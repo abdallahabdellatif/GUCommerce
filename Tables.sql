@@ -52,7 +52,7 @@ FOREIGN KEY(admin_username) REFERENCES Admins ON DELETE	SET NULL ON UPDATE CASCA
 CREATE TABLE Delivery_Person(username VARCHAR(20), 
 is_activated BIT --NOT MENTIONED EXPLICITLY
 PRIMARY KEY (username),
-FOREIGN KEY (username) REFERENCES Users
+FOREIGN KEY (username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
 )
 --------------
 
@@ -67,8 +67,7 @@ fees DECIMAL (5,3),
 username VARCHAR(20),
 -- delivery_type VARCHAR(20)  --exists in MS2 inputs , doesn't exist in ERD / Schema !!
 PRIMARY KEY (id)
-FOREIGN KEY (username) REFERENCES Admins
-
+FOREIGN KEY (username) REFERENCES Admins ON DELETE CASCADE ON UPDATE CASCADE -- IS THIS TRUE !?
 )
 CREATE TABLE Orders(order_no INT IDENTITY, -- identity is true,right ??
 order_date DATETIME -- Not mentioned explicitly, 
@@ -104,8 +103,8 @@ vendor_username VARCHAR(20),
 customer_username VARCHAR(20), 
 customer_order_id INT,
 PRIMARY KEY (serial_no),
-FOREIGN KEY(vendor_username) REFERENCES Vendor,
-FOREIGN KEY(customer_order_id) REFERENCES Orders
+FOREIGN KEY(vendor_username) REFERENCES Vendor  ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY(customer_order_id) REFERENCES Orders ON DELETE CASCADE ON UPDATE CASCADE
 )
 
 
@@ -119,10 +118,10 @@ color VARCHAR(20), --woat?
 image VARCHAR(20), --woat again?
 description VARCHAR(100), --is it stated in procs?
 category VARCHAR(20),
+PRIMARY KEY(serial_number)
 FOREIGN KEY (order_number) REFERENCES Orders ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (cutsomer_username) REFERENCES Customer ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY(vendor_username) REFERENCES Vendor ON DELETE CASCADE ON UPDATE CASCADE,
-PRIMARY KEY(serial_number)
 );
 
 
