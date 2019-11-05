@@ -5,170 +5,237 @@
 
 --DONT FORGET REFERENTIAL INTEGRITY
 --DONT RUN ANY SHIT 
+-- RUN ALL THE SHIT --AROUSY
 
 
-
-CREATE TABLE Users(username VARCHAR(20), 
+CREATE TABLE Users(
+username VARCHAR(20), 
 password VARCHAR(20), 
 first_name VARCHAR(20), 
-last_name VARCHAR(20), 
-password VARCHAR(20), 
-email VARCHAR(50));
+last_name VARCHAR(20),  
+email VARCHAR(50),
+PRIMARY KEY (username)
+);
 
 
-CREATE TABLE User_mobile_numbers(mobile_number VARCHAR(20), 
+CREATE TABLE User_mobile_numbers(
+mobile_number VARCHAR(20), 
 username VARCHAR(20),
 PRIMARY KEY(mobile_number,username),
 FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE User_Addresses(address VARCHAR(20), 
+
+
+CREATE TABLE User_Addresses(
+address VARCHAR(20), 
 username VARCHAR(20)
 PRIMARY KEY(address,username),
 FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE Customer(username VARCHAR(20), 
+
+CREATE TABLE Customer(
+username VARCHAR(20), 
 points INT,							-- Not mentioned explicitly
 PRIMARY KEY(username),
 FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE Admins(username VARCHAR(20),
+
+CREATE TABLE Admins(
+username VARCHAR(20),
 PRIMARY KEY(username),
 FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
-)
+);
 
-CREATE TABLE Vendor(username VARCHAR(20), 
+
+CREATE TABLE Vendor(
+username VARCHAR(20), 
 activated BIT,						-- Not mentioned explicitly
 company_name VARCHAR(20), 
 bank_acc_no VARCHAR(20), 
 admin_username VARCHAR(20)
 PRIMARY KEY (username),
 FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY(admin_username) REFERENCES Admins ON DELETE	SET NULL ON UPDATE CASCADE
+FOREIGN KEY(admin_username) REFERENCES Admins -- ON UPDATE CASCADE
 			--WHAT SHOULD WE DO HERE if an Admin is DELETED !? TAKE CARE
-)
+);
+
 
 CREATE TABLE Delivery_Person(username VARCHAR(20), 
 is_activated BIT --NOT MENTIONED EXPLICITLY
 PRIMARY KEY (username),
 FOREIGN KEY (username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
-)
---------------
+);
 
-CREATE TABLE Credit_Card(number VARCHAR(20), -- how 20 ?!! shouldn't it be 16 !!!!?
-expiry_date --what ?, 
-cvv_code	--WHAT
+
+CREATE TABLE Credit_Card(number VARCHAR(20), -- how 20 ?!! shouldn't it be 16 !!!!? msh far2a ya esss
+expiry_date VARCHAR(10),--what ?, 
+cvv_code VARCHAR(20)	--WHAT-- habda mny 
 PRIMARY KEY (number)
-)
+);
+
+
 CREATE TABLE Delivery(id INT IDENTITY, --Not mentioned explicitly
 time_duration INT, 
 fees DECIMAL (5,3), 
 username VARCHAR(20),
 -- delivery_type VARCHAR(20)  --exists in MS2 inputs , doesn't exist in ERD / Schema !!
-PRIMARY KEY (id)
+PRIMARY KEY (id),
 FOREIGN KEY (username) REFERENCES Admins ON DELETE CASCADE ON UPDATE CASCADE -- IS THIS TRUE !?
-)
-CREATE TABLE Orders(order_no INT IDENTITY, -- identity is true,right ??
-order_date DATETIME -- Not mentioned explicitly, 
-total_amount decimal(10,3), -- not mentioned explicilty ; but price is decimal(10,2) del_fees is decimal(5,3), others are either(10,2) or int, 
-cash_amount DECIMAL(10,2), -- I think it is the as in (o) in page 4
-credit_amount DECIMAL(10,2), -- I think it is the as in (o) in page 4
-payment_type,  -- BALABIZO ;; WHAT IS THIS !!?
-order_status VARCHAR(20), --Not mentioned explicitly 
-remaining_days INT,  -- Mentioned in (s) in page 4 
-time_limit , 	--BALABIZO ;; WHAT IS THIS !!?
-customer_name VARCHAR(20), 
-delivery_id INT, 
-creditCard_number VARCHAR(20)
-PRIMARY KEY (order_no),
-FOREIGN KEY (customer_name) REFERENCES Customer ON DELETE CASCADE ON UPDATE CASCADE, -- if a customer is deleted; then all his orders should be deleted ?
-FOREIGN KEY (delivery_id) REFERENCES Delivery ON DELETE CASCADE ON UPDATE CASCADE -- is it so?,
-FOREIGN KEY (creditCard_number) REFERENCES Credit_Card ON DELETE CASCADE ON UPDATE CASCADE 
-	-- I THINK THE LAST SHOULD BE NO ACTION ???
-)
-
-
-
-
-CREATE TABLE Product(serial_no INT, 
-product_name VARCHAR(20), 
-category VARCHAR(20), 
-product_description TEXT, -- IS 'TEXT'WRITTED THIS SAME WAY ?
-final_price DECIMAL(10,2),-- IT is written in the MS2 as price not "final_price" !?, 
-color VARCHAR(20), 
-available BIT, --Not mentioned explicitly
-rate INT, -- (n) in page 4 
-vendor_username VARCHAR(20), 
-customer_username VARCHAR(20), 
-customer_order_id INT,
-PRIMARY KEY (serial_no),
-FOREIGN KEY(vendor_username) REFERENCES Vendor  ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY(customer_order_id) REFERENCES Orders ON DELETE CASCADE ON UPDATE CASCADE
-)
-
-
-
-CREATE TABLE Product(
-serial_number INT IDENTITY,
-p_name VARCHAR(20),
-price DECIMAL(10,2),
-rate DECIMAL(2,2),
-color VARCHAR(20), --woat?
-image VARCHAR(20), --woat again?
-description VARCHAR(100), --is it stated in procs?
-category VARCHAR(20),
-PRIMARY KEY(serial_number)
-FOREIGN KEY (order_number) REFERENCES Orders ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY (cutsomer_username) REFERENCES Customer ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY(vendor_username) REFERENCES Vendor ON DELETE CASCADE ON UPDATE CASCADE,
 );
 
 
+CREATE TABLE Orders(order_no INT IDENTITY, -- identity is true,right ??
+order_date DATETIME, -- Not mentioned explicitly, 
+total_amount decimal(10,3), -- not mentioned explicilty ; but price is decimal(10,2) del_fees is decimal(5,3), others are either(10,2) or int, 
+cash_amount DECIMAL(10,2), -- I think it is the as in (o) in page 4
+credit_amount DECIMAL(10,2), -- I think it is the as in (o) in page 4
+payment_type VARCHAR(20),  -- BALABIZO ;; WHAT IS THIS !!?
+order_status VARCHAR(20), --Not mentioned explicitly 
+remaining_days INT,  -- Mentioned in (s) in page 4 
+time_limit VARCHAR(20) , 	--BALABIZO ;; WHAT IS THIS !!?
+customer_name VARCHAR(20), 
+delivery_id INT, 
+creditCard_number VARCHAR(20),
+PRIMARY KEY (order_no),
+FOREIGN KEY (customer_name) REFERENCES Customer ON DELETE CASCADE ON UPDATE CASCADE, -- if a customer is deleted; then all his orders should be deleted ?
+FOREIGN KEY (delivery_id) REFERENCES Delivery,-- ON DELETE CASCADE ON UPDATE CASCADE, -- is it so?,
+FOREIGN KEY (creditCard_number) REFERENCES Credit_Card ON DELETE CASCADE ON UPDATE CASCADE 
+	-- I THINK THE LAST SHOULD BE NO ACTION ???
+);
 
 
-CustomerAddstoCartProduct(serial_no, customer_name)
+CREATE TABLE Product(
+serial_number int IDENTITY,
+product_name VARCHAR(20),
+category VARCHAR (20),
+product_description text,
+final_price DECIMAL(10,3),
+color VARCHAR (20),
+available BIT , -- didn't mention type
+rate INT, -- (n) in page 4 msh fahem asdak eh ya ess :D
+vendor_username VARCHAR(20), 
+customer_username VARCHAR(20), 
+customer_order_id INT,
+PRIMARY KEY(serial_number),
+FOREIGN KEY(vendor_username) REFERENCES Vendor ON DELETE CASCADE ON UPDATE CASCADE,
+--FOREIGN KEY (cutsomer_username) REFERENCES Customer ON DELETE CASCADE ON UPDATE CASCADE, -- fl schema msh m3mola dashed line enaha foreign key ezay ????!
+FOREIGN KEY(customer_order_id) REFERENCES Orders --ON DELETE CASCADE ON UPDATE CASCADE
+);
 
-CustomerAddstoCartProduct.serial_no References Product
-CustomerAddstoCartProduct.customer_name References Customer
-Todays_Deals(deal_id, deal_amount, expiry_date, admin_username)
-----------------
-Todays_Deals.admin_username References Admins
-Todays_Deals_Product(deal_id, serial_no, issue_date)
----------------------
-Todays_Deals_Product.deal_id References Todays_Deals
-Todays_Deals_Product.serial_no References Product
-offer(offer_id, offer_amount, expiry_date)
-offersOnProduct(offer_id, serial_no)
------------------------
-offersOnProduct.offer_id References offer
-offersOnProduct.serial_no References Product
-Customer_Question_Product(serial_no, customer_name, question, answer)
------------- ------------------
-Customer_Question_Product.serial_no References Product
-Customer_Question_Product.customer_name References Customer
-Wishlist(username, name)
--------------
-Wishlist.username References Customer
-Giftcard(code, expiry_date, amount, username)
------------
-Giftcard.username References Admins
-Wishlist_Product(username, wish_name, serial_no)
----------------------------------------
-Wishlist_Product.username References Wishlist
-Wishlist_Product.wish_name References Wishlist
-Wishlist_Product.serial_no References Product
-Admin_Customer_Giftcard(code, customer_name, admin_username)
----------------------------- -------------------
-Admin_Customer_Giftcard.code References Giftcard
-Admin_Customer_Giftcard.customer_name References Customer
-Admin_Customer_Giftcard.admin_username References Admins
-Admin_Delivery_Order(delivery_username, order_no, admin_username, delivery_window)
------------------------------------ ---------------------
-Admin_Delivery_Order.delivery_username References Delivery_person
-Admin_Delivery_Order.order_no References orders
-Admin_Delivery_Order.admin_username References Admins
-Customer_CreditCard(customer_name, cc_number)
-----------------------------------
-Customer_CreditCard.customer_name References Customer
-Customer_CreditCard.cc_number References Credit_Card
+
+CREATE TABLE CustomerAddstoCartProduct(
+serial_no INT, 
+customer_name VARCHAR (20),
+PRIMARY KEY (serial_no,customer_name),
+FOREIGN KEY (serial_no) REFERENCES Product ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (customer_name) REFERENCES Customer --ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE Todays_Deals(
+deal_id INT,
+deal_amount INT,
+expiry_date datetime,
+admin_username VARCHAR(20),
+PRIMARY KEY (deal_id),
+FOREIGN KEY (admin_username) REFERENCES Admins ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE Todays_Deals_Product(
+deal_id INT,
+serial_no INT,
+issue_date datetime, ---- didn't state type
+PRIMARY KEY (deal_id ,serial_no),
+FOREIGN KEY (deal_id) REFERENCES Todays_Deals , --ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (serial_no) REFERENCES Product ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE offer(
+offer_id INT,
+offer_amount INT,
+expiry_date datetime,
+PRIMARY KEY (offer_id)
+);
+
+
+CREATE TABLE offersOnProduct(
+offer_id INT,
+serial_no INT,
+PRIMARY KEY (offer_id , serial_no),
+FOREIGN KEY (offer_id) REFERENCES offer ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (serial_no) REFERENCES Product ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE Customer_Question_Product(
+serial_no INT,
+customer_name VARCHAR(20),
+question TEXT, -----question type is not stated
+answer TEXT, 
+PRIMARY KEY (serial_no ,customer_name ),
+FOREIGN KEY (serial_no) REFERENCES Product ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (customer_name) REFERENCES Customer --ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE Wishlist(
+username VARCHAR (20),
+name VARCHAR (20),
+PRIMARY KEY (username , name),
+FOREIGN KEY (username) REFERENCES Customer ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE Giftcard(
+code VARCHAR(10),
+expiry_date datetime,
+amount INT, 
+username VARCHAR(20),
+PRIMARY KEY (code),
+FOREIGN KEY (username) REFERENCES Admins ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE Wishlist_Product(
+username VARCHAR (20),
+wish_name VARCHAR (20),
+serial_no INT,
+PRIMARY KEY (username , wish_name , serial_no),
+FOREIGN KEY (username , wish_name) REFERENCES WishList ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (serial_no) REFERENCES Product --ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Admin_Customer_Giftcard(
+code VARCHAR(10),
+customer_name VARCHAR (20),
+admin_username VARCHAR(20),
+PRIMARY KEY (code , customer_name ,admin_username),
+FOREIGN KEY (code) REFERENCES Giftcard ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (customer_name) REFERENCES Customer , --ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (admin_username) REFERENCES Admins --ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE Admin_Delivery_Order(
+delivery_username VARCHAR (20),
+order_no INT,
+admin_username VARCHAR (20), 
+delivery_window VARCHAR (40),
+PRIMARY KEY (delivery_username,order_no),
+FOREIGN KEY (delivery_username) REFERENCES Delivery_person,-- ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (order_no) REFERENCES Orders , -- ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (admin_username) REFERENCES Admins ON DELETE CASCADE ON UPDATE CASCADE);
+
+
+CREATE TABLE Customer_CreditCard(
+customer_name VARCHAR(20), 
+cc_number VARCHAR (20),
+PRIMARY KEY (customer_name,cc_number),
+FOREIGN KEY (customer_name) REFERENCES Customer ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (cc_number) REFERENCES Credit_Card ON DELETE CASCADE ON UPDATE CASCADE);
+
+
