@@ -10,7 +10,7 @@
 
 CREATE TABLE Users(
 username VARCHAR(20), 
-password VARCHAR(20), 
+password VARCHAR(20) NOT NULL,
 first_name VARCHAR(20), 
 last_name VARCHAR(20),  
 email VARCHAR(50),
@@ -50,11 +50,11 @@ FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
 
 
 CREATE TABLE Vendor(
-username VARCHAR(20), 
+username VARCHAR(20) , 
 activated BIT,						-- Not mentioned explicitly
 company_name VARCHAR(20), 
 bank_acc_no VARCHAR(20), 
-admin_username VARCHAR(20)
+admin_username VARCHAR(20),
 PRIMARY KEY (username),
 FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY(admin_username) REFERENCES Admins -- ON UPDATE CASCADE
@@ -117,7 +117,7 @@ FOREIGN KEY (creditCard_number) REFERENCES Credit_Card ON DELETE CASCADE ON UPDA
 CREATE TABLE Product(
 serial_no INT IDENTITY,
 product_name VARCHAR(20),
-category VARCHAR (20),
+category VARCHAR(20),
 product_description text,
 -- in eerd they have 2 att. price and final_price ; but in schema only final_price
 final_price DECIMAL(10,2),	--On (a) and (c) in page 5
