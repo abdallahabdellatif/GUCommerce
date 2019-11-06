@@ -76,6 +76,7 @@ PRIMARY KEY (number)
 );
 
 
+
 CREATE TABLE Delivery(id INT IDENTITY, --Not mentioned explicitly
 time_duration INT, 
 fees DECIMAL (5,3), 
