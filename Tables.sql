@@ -62,22 +62,26 @@ FOREIGN KEY(admin_username) REFERENCES Admins -- ON UPDATE CASCADE
 );
 
 
-CREATE TABLE Delivery_Person(username VARCHAR(20), 
+CREATE TABLE Delivery_Person(
+username VARCHAR(20), 
 is_activated BIT --NOT MENTIONED EXPLICITLY
 PRIMARY KEY (username),
 FOREIGN KEY (username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 
-CREATE TABLE Credit_Card(number VARCHAR(20), -- how 20 ?!! shouldn't it be 16 !!!!? msh far2a ya esss
+CREATE TABLE Credit_Card(
+number VARCHAR(20), -- how 20 ?!! shouldn't it be 16 !!!!? msh far2a ya esss -- ok :)
 expiry_date VARCHAR(10),--what ?, 
-cvv_code VARCHAR(20)	--WHAT-- habda mny 
+--cvv_code VARCHAR(20)	--WHAT-- habda mny 	
+cvv_code CHAR(3)	--IT should always be 3 and only 3 digits I Think !
 PRIMARY KEY (number)
 );
 
 
 
-CREATE TABLE Delivery(id INT IDENTITY, --Not mentioned explicitly
+CREATE TABLE Delivery(
+id INT IDENTITY, --Not mentioned explicitly
 time_duration INT, 
 fees DECIMAL (5,3), 
 username VARCHAR(20),
@@ -87,9 +91,12 @@ FOREIGN KEY (username) REFERENCES Admins ON DELETE CASCADE ON UPDATE CASCADE -- 
 );
 
 
-CREATE TABLE Orders(order_no INT IDENTITY, -- identity is true,right ??
+CREATE TABLE Orders(
+order_no INT IDENTITY, -- identity is true,right ??
 order_date DATETIME, -- Not mentioned explicitly, 
-total_amount decimal(10,3), -- not mentioned explicilty ; but price is decimal(10,2) del_fees is decimal(5,3), others are either(10,2) or int, 
+total_amount decimal(10,2), -- not mentioned explicilty ;
+-- but price is decimal(10,2) del_fees is decimal(5,3), others are either(10,2) or int, 
+--(j) on page 3 ; specifes that price of an order is DECIMAL(10,2);
 cash_amount DECIMAL(10,2), -- I think it is the as in (o) in page 4
 credit_amount DECIMAL(10,2), -- I think it is the as in (o) in page 4
 payment_type VARCHAR(20),  -- BALABIZO ;; WHAT IS THIS !!?
@@ -108,20 +115,26 @@ FOREIGN KEY (creditCard_number) REFERENCES Credit_Card ON DELETE CASCADE ON UPDA
 
 
 CREATE TABLE Product(
-serial_number int IDENTITY,
+serial_no INT IDENTITY,
 product_name VARCHAR(20),
 category VARCHAR (20),
 product_description text,
-final_price DECIMAL(10,3),
-color VARCHAR (20),
+-- in eerd they have 2 att. price and final_price ; but in schema only final_price
+final_price DECIMAL(10,2),	--On (a) and (c) in page 5
+color VARCHAR (20), 		--on (a) page 5
 available BIT , -- didn't mention type
-rate INT, -- (n) in page 4 msh fahem asdak eh ya ess :D
+rate INT, -- (n) in page 4
+-- msh fahem asdak eh ya ess :D	 
+-- إلى عرووووسي
+-- 2asdi en l m3loma di gaya mn p4 fe MS_II.pdf fe l point rakam (n)
 vendor_username VARCHAR(20), 
 customer_username VARCHAR(20), 
 customer_order_id INT,
-PRIMARY KEY(serial_number),
+PRIMARY KEY(serial_no),
 FOREIGN KEY(vendor_username) REFERENCES Vendor ON DELETE CASCADE ON UPDATE CASCADE,
---FOREIGN KEY (cutsomer_username) REFERENCES Customer ON DELETE CASCADE ON UPDATE CASCADE, -- fl schema msh m3mola dashed line enaha foreign key ezay ????!
+FOREIGN KEY (cutsomer_username) REFERENCES Customer ON DELETE CASCADE ON UPDATE CASCADE, 
+-- fl schema msh m3mola dashed line enaha foreign key ezay ????!
+-- YOU ARE RIGHT AROSI <3 
 FOREIGN KEY(customer_order_id) REFERENCES Orders --ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -136,9 +149,9 @@ FOREIGN KEY (customer_name) REFERENCES Customer --ON DELETE CASCADE ON UPDATE CA
 
 
 CREATE TABLE Todays_Deals(
-deal_id INT,
+deal_id INT IDENTITY,
 deal_amount INT,
-expiry_date datetime,
+expiry_date DATETIME,
 admin_username VARCHAR(20),
 PRIMARY KEY (deal_id),
 FOREIGN KEY (admin_username) REFERENCES Admins ON DELETE CASCADE ON UPDATE CASCADE
@@ -156,9 +169,9 @@ FOREIGN KEY (serial_no) REFERENCES Product ON DELETE CASCADE ON UPDATE CASCADE
 
 
 CREATE TABLE offer(
-offer_id INT,
+offer_id INT IDENTITY,
 offer_amount INT,
-expiry_date datetime,
+expiry_date DATETIME,
 PRIMARY KEY (offer_id)
 );
 
@@ -175,9 +188,9 @@ FOREIGN KEY (serial_no) REFERENCES Product ON DELETE CASCADE ON UPDATE CASCADE
 CREATE TABLE Customer_Question_Product(
 serial_no INT,
 customer_name VARCHAR(20),
-question TEXT, -----question type is not stated
-answer TEXT, 
-PRIMARY KEY (serial_no ,customer_name ),
+question VARCHAR(50), -----question type is not stated	-- see (d) in page 2
+answer TEXT,	--TRUE (y) <3
+PRIMARY KEY (serial_no ,customer_name),
 FOREIGN KEY (serial_no) REFERENCES Product ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (customer_name) REFERENCES Customer --ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -193,7 +206,7 @@ FOREIGN KEY (username) REFERENCES Customer ON DELETE CASCADE ON UPDATE CASCADE
 
 CREATE TABLE Giftcard(
 code VARCHAR(10),
-expiry_date datetime,
+expiry_date DATETIME,
 amount INT, 
 username VARCHAR(20),
 PRIMARY KEY (code),
@@ -225,7 +238,7 @@ CREATE TABLE Admin_Delivery_Order(
 delivery_username VARCHAR (20),
 order_no INT,
 admin_username VARCHAR (20), 
-delivery_window VARCHAR (40),
+delivery_window VARCHAR (50),	--(c) in page 7
 PRIMARY KEY (delivery_username,order_no),
 FOREIGN KEY (delivery_username) REFERENCES Delivery_person,-- ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (order_no) REFERENCES Orders , -- ON DELETE CASCADE ON UPDATE CASCADE,
@@ -237,6 +250,7 @@ customer_name VARCHAR(20),
 cc_number VARCHAR (20),
 PRIMARY KEY (customer_name,cc_number),
 FOREIGN KEY (customer_name) REFERENCES Customer ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY (cc_number) REFERENCES Credit_Card ON DELETE CASCADE ON UPDATE CASCADE);
+FOREIGN KEY (cc_number) REFERENCES Credit_Card ON DELETE CASCADE ON UPDATE CASCADE
+);
 
 
