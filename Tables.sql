@@ -182,7 +182,7 @@ FOREIGN KEY (customer_name) REFERENCES Customer --ON DELETE CASCADE ON UPDATE CA
 );
 
 
-CREATE TABLE Wishlist(
+CREATE TABLE Wishlist (
 username VARCHAR (20),
 name VARCHAR (20),
 PRIMARY KEY (username , name),
