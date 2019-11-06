@@ -71,7 +71,7 @@ FOREIGN KEY (username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
 
 CREATE TABLE Credit_Card(number VARCHAR(20), -- how 20 ?!! shouldn't it be 16 !!!!? msh far2a ya esss
 expiry_date VARCHAR(10),--what ?, 
-cvv_code VARCHAR(20)	--WHAT-- habda mny 
+cvv_code VARCHAR(20),	--WHAT-- habda mny 
 PRIMARY KEY (number)
 );
 
