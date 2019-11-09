@@ -10,11 +10,12 @@
 
 CREATE TABLE Users(
 username VARCHAR(20), 
-password VARCHAR(20) NOT NULL,
+password VARCHAR(20),
 first_name VARCHAR(20), 
 last_name VARCHAR(20),  
 email VARCHAR(50),
-PRIMARY KEY (username)
+PRIMARY KEY (username),
+CONSTRAINT email_unique UNIQUE(email)
 );
 
 
@@ -22,7 +23,8 @@ CREATE TABLE User_mobile_numbers(
 mobile_number VARCHAR(20), 
 username VARCHAR(20),
 PRIMARY KEY(mobile_number,username),
-FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
+FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE,
+-- same mobile number may belong to more than one user ; so won't make it UNIQUE
 );
 
 
@@ -37,6 +39,7 @@ FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
 CREATE TABLE Customer(
 username VARCHAR(20), 
 points INT,							-- Not mentioned explicitly
+-- should we add default value 0 for points ?
 PRIMARY KEY(username),
 FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
 );
