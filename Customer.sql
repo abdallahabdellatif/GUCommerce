@@ -26,6 +26,7 @@ END
 --b,c zy (a) okhtohom ely fo2 el line da bzbt
 --CREATE FUNCTION ShowProductsbyPrice       --b
 --CREATE FUNCTION searchbyname @text VARCHAR(20)          --c
+
 GO
 CREATE PROC AddQuestion --d
 @serial INT,@customer VARCHAR(20),@Question VARCHAR(50) --product customer question
@@ -171,8 +172,8 @@ BEGIN
 DECLARE @amo DECIMAL(10,2)
 SET @amo=dbo.calculatepriceOrder (@customername)
 
-INSERT INTO Orders(customer_name,total_amount)
-VALUES(@customername,@amo)
+INSERT INTO Orders(customer_name,total_amount, order_date)
+VALUES(@customername,@amo, CURRENT_TIMESTAMP)
 
 DECLARE @orderNO INT
 SELECT @orderNO=MAX(order_no)
