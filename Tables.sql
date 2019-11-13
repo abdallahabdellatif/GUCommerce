@@ -61,7 +61,8 @@ admin_username VARCHAR(20),
 PRIMARY KEY (username),
 FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY(admin_username) REFERENCES Admins -- ON UPDATE CASCADE
-			--WHAT SHOULD WE DO HERE if an Admin is DELETED !? TAKE CARE
+--TODO : Trigger ?
+--WHAT SHOULD WE DO HERE if an Admin is DELETED !? TAKE CARE
 );
 
 
@@ -74,13 +75,11 @@ FOREIGN KEY (username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
 
 
 CREATE TABLE Credit_Card(
-number VARCHAR(20), -- how 20 ?!! shouldn't it be 16 !!!!? msh far2a ya esss -- ok :)
+number VARCHAR(20),
 expiry_date VARCHAR(10),--what ?, 
---cvv_code VARCHAR(20)	--WHAT-- habda mny 	
-cvv_code CHAR(3)	--IT should always be 3 and only 3 digits I Think !
+cvv_code VARCHAR(20)	--WHAT-- habda mny 	
 PRIMARY KEY (number)
 );
-
 
 
 CREATE TABLE Delivery(
@@ -88,7 +87,7 @@ id INT IDENTITY, --Not mentioned explicitly
 time_duration INT, 
 fees DECIMAL (5,3), 
 username VARCHAR(20),
--- delivery_type VARCHAR(20)  --exists in MS2 inputs , doesn't exist in ERD / Schema !!
+delivery_type VARCHAR(20)  --exists in MS2 inputs , doesn't exist in ERD / Schema !!
 PRIMARY KEY (id),
 FOREIGN KEY (username) REFERENCES Admins ON DELETE CASCADE ON UPDATE CASCADE -- IS THIS TRUE !?
 );
@@ -106,10 +105,12 @@ payment_type VARCHAR(20),  -- BALABIZO ;; WHAT IS THIS !!?
 order_status VARCHAR(20), --Not mentioned explicitly 
 remaining_days INT,  -- Mentioned in (s) in page 4 
 time_limit VARCHAR(20) , 	--BALABIZO ;; WHAT IS THIS !!?
+Gift_Card_code_used VARCHAR(10),	--added in finSch(3) -- same type as CODE
 customer_name VARCHAR(20), 
 delivery_id INT, 
 creditCard_number VARCHAR(20),
 PRIMARY KEY (order_no),
+FOREIGN KEY (Gift_Card_code_used) REFERENCES Giftcard ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (customer_name) REFERENCES Customer ON DELETE CASCADE ON UPDATE CASCADE, -- if a customer is deleted; then all his orders should be deleted ?
 FOREIGN KEY (delivery_id) REFERENCES Delivery,-- ON DELETE CASCADE ON UPDATE CASCADE, -- is it so?,
 FOREIGN KEY (creditCard_number) REFERENCES Credit_Card ON DELETE CASCADE ON UPDATE CASCADE 
@@ -126,8 +127,7 @@ product_description text,
 final_price DECIMAL(10,2),	--On (a) and (c) in page 5
 color VARCHAR (20), 		--on (a) page 5
 available BIT , -- didn't mention type
-rate INT, -- (n) in page 4
--- msh fahem asdak eh ya ess :D	 
+rate INT, -- (n) in page +4+
 -- إلى عرووووسي
 -- 2asdi en l m3loma di gaya mn p4 fe MS_II.pdf fe l point rakam (n)
 vendor_username VARCHAR(20), 
@@ -164,7 +164,7 @@ FOREIGN KEY (admin_username) REFERENCES Admins ON DELETE CASCADE ON UPDATE CASCA
 CREATE TABLE Todays_Deals_Product(
 deal_id INT,
 serial_no INT,
-issue_date datetime, ---- didn't state type
+issue_date DATETIME, ---- didn't state type
 PRIMARY KEY (deal_id ,serial_no),
 FOREIGN KEY (deal_id) REFERENCES Todays_Deals , --ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (serial_no) REFERENCES Product ON DELETE CASCADE ON UPDATE CASCADE
@@ -230,6 +230,7 @@ CREATE TABLE Admin_Customer_Giftcard(
 code VARCHAR(10),
 customer_name VARCHAR (20),
 admin_username VARCHAR(20),
+remaining_points INT,	--added after finSch(3)
 PRIMARY KEY (code , customer_name ,admin_username),
 FOREIGN KEY (code) REFERENCES Giftcard ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (customer_name) REFERENCES Customer , --ON DELETE CASCADE ON UPDATE CASCADE,
