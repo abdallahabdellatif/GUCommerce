@@ -87,7 +87,7 @@ id INT IDENTITY, --Not mentioned explicitly
 time_duration INT, 
 fees DECIMAL (5,3), 
 username VARCHAR(20),
-delivery_type VARCHAR(20)  --exists in MS2 inputs , doesn't exist in ERD / Schema !!
+delivery_type VARCHAR(20),  --exists in MS2 inputs , doesn't exist in ERD / Schema !!
 PRIMARY KEY (id),
 FOREIGN KEY (username) REFERENCES Admins ON DELETE CASCADE ON UPDATE CASCADE -- IS THIS TRUE !?
 );
