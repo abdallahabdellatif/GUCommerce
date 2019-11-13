@@ -44,7 +44,6 @@ PRIMARY KEY(username),
 FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-
 CREATE TABLE Admins(
 username VARCHAR(20),
 PRIMARY KEY(username),
@@ -84,10 +83,10 @@ PRIMARY KEY (number)
 
 CREATE TABLE Delivery(
 id INT IDENTITY, --Not mentioned explicitly
-time_duration INT, 
-fees DECIMAL (5,3), 
+time_duration INT NOT NULL, 
+fees DECIMAL (5,3) NOT NULL, 
 username VARCHAR(20),
-delivery_type VARCHAR(20)  --exists in MS2 inputs , doesn't exist in ERD / Schema !!
+delivery_type VARCHAR(20),  --exists in MS2 inputs , doesn't exist in ERD / Schema !!
 PRIMARY KEY (id),
 FOREIGN KEY (username) REFERENCES Admins ON DELETE CASCADE ON UPDATE CASCADE -- IS THIS TRUE !?
 );
@@ -102,7 +101,8 @@ total_amount decimal(10,2), -- not mentioned explicilty ;
 cash_amount DECIMAL(10,2), -- I think it is the as in (o) in page 4
 credit_amount DECIMAL(10,2), -- I think it is the as in (o) in page 4
 payment_type VARCHAR(20),  -- BALABIZO ;; WHAT IS THIS !!?
-order_status VARCHAR(20), --Not mentioned explicitly 
+order_status VARCHAR(20) DEFAULT 'not processed' ,	-- Ba3boos ;; is this right ?
+--- بص ع السطر اللي فوق ^^
 remaining_days INT,  -- Mentioned in (s) in page 4 
 time_limit VARCHAR(20) , 	--BALABIZO ;; WHAT IS THIS !!?
 Gift_Card_code_used VARCHAR(10),	--added in finSch(3) -- same type as CODE
