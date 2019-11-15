@@ -29,7 +29,9 @@ END
 
 GO
 CREATE PROC AddQuestion --d
-@serial INT,@customer VARCHAR(20),@Question VARCHAR(50) --product customer question
+@serial INT,
+@customer VARCHAR(20),
+@Question VARCHAR(50) --product customer question
 AS
 BEGIN
 INSERT INTO Customer_Question_Product(serial_no,customer_name,question) 
@@ -131,7 +133,7 @@ AS
 BEGIN
 SELECT *
 FROM Product
-ORDER BY final_price
+ORDER BY final_price		-- Check
 END
 
 GO
@@ -141,7 +143,7 @@ AS
 BEGIN
 SELECT *
 FROM Product 
-WHERE product_name=@text
+WHERE product_name=@text	--Check ; maybe sth not as restrict as = ?
 END
 
 GO
@@ -149,11 +151,21 @@ CREATE PROC showWishlistProduct --h
 @customername varchar(20), @name varchar(20)
 AS 
 BEGIN
-SELECT *
-FROM Wishlist
+SELECT *				-- this will just show : customerName and WishlistName !
+FROM Wishlist						
 WHERE username=@customername AND name=@name
 END
-
+GO
+CREATE PROC showWishlistProduct --h
+@customername varchar(20), @name varchar(20)
+AS 
+BEGIN
+SELECT P.*				-- Is this correct ?
+FROM Wishlist W INNER JOIN Wishlist_Product WP 
+ON W.username=WP.username AND W.name=WP.wish_name
+INNER JOIN Product P ON P.serial_no=WP.serial_no
+WHERE W.username=@customername AND W.name=@name
+END
 GO
 CREATE PROC  viewMyCart --i
 @customer varchar(20)
@@ -259,6 +271,20 @@ SET points=points+@credit --mesh 3aref ba2a
 END
 
 GO
+CREATE PROC AddCreditCard --new p
+@creditcardnumber varchar(20), 
+@expirydate date , 
+@cvv varchar(4), 
+@customername varchar(20)
+AS
+BEGIN
+INSERT INTO Credit_Card
+VALUES (@creditcardnumber, @expirydate, @cvv);
+INSERT INTO Customer_CreditCard
+VALUES (@customername, @creditcardnumber);
+END
+
+GO
 CREATE PROC ChooseCreditCard --p
 @creditcard varchar(20), @orderid int
 AS
@@ -281,9 +307,17 @@ CREATE PROC specifydeliverytype --r
 @orderID int, @deliveryID INT
 AS
 BEGIN
+DECLARE @DAYS int
+SELECT @DAYS = time_duration
+FROM Delivery
+WHERE id = @deliveryID
+
 UPDATE Orders
 SET delivery_id=@deliveryID
 WHERE order_no=@orderID
+
+UPDATE Orders 
+SET remaining_days =  @DAYS  - DAY (CURRENT_TIMESTAMP - order_date )
 END
 
 GO
@@ -292,6 +326,20 @@ CREATE PROC trackRemainingDays --s
 @days INT OUTPUT                      --fa homa 7atino leh
 AS                                     --fa 8aleban ely ana 3amlo 8alat
 BEGIN
+DECLARE @RDAYS int
+DECLARE @Did INT
+
+SELECT @Did = delivery_id
+FROM Orders
+WHERE order_no= @orderid
+
+SELECT @RDAYS = time_duration
+FROM Delivery
+WHERE id = @Did
+
+UPDATE Orders 
+SET remaining_days =  @RDAYS  - DAY (CURRENT_TIMESTAMP - order_date )
+
 SELECT @days=remaining_days
 FROM Orders
 WHERE order_no=@orderid AND customer_name=@customername

@@ -1,13 +1,3 @@
---IMPORTANT NOTE !!
-
---WHEN DECLARING ATTRIBUTES OF A TABLE CHECK IF IT'S REFERED BY A PROCEDURE TO KNOW IT'S TYPE 
---AND IF IT'S A VARCHAR HOW MANY CHARACTERS IT HAS TO BE ACCEPTED BY A PROCEDURE
-
---DONT FORGET REFERENTIAL INTEGRITY
---DONT RUN ANY SHIT 
--- RUN ALL THE SHIT --AROUSY
-
-
 CREATE TABLE Users(
 username VARCHAR(20), 
 password VARCHAR(20),
@@ -18,38 +8,34 @@ PRIMARY KEY (username),
 CONSTRAINT email_unique UNIQUE(email)
 );
 
-
 CREATE TABLE User_mobile_numbers(
 mobile_number VARCHAR(20), 
 username VARCHAR(20),
 PRIMARY KEY(mobile_number,username),
-FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY(username) REFERENCES Users --ON DELETE CASCADE ON UPDATE CASCADE,
 -- same mobile number may belong to more than one user ; so won't make it UNIQUE
 );
-
 
 CREATE TABLE User_Addresses(
 address VARCHAR(20), 
 username VARCHAR(20)
 PRIMARY KEY(address,username),
-FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
+FOREIGN KEY(username) REFERENCES Users -- ON DELETE CASCADE ON UPDATE CASCADE
 );
-
 
 CREATE TABLE Customer(
 username VARCHAR(20), 
 points INT,							-- Not mentioned explicitly
 -- should we add default value 0 for points ?
 PRIMARY KEY(username),
-FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
+FOREIGN KEY(username) REFERENCES Users --ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE Admins(
 username VARCHAR(20),
 PRIMARY KEY(username),
-FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
+FOREIGN KEY(username) REFERENCES Users --ON DELETE CASCADE ON UPDATE CASCADE
 );
-
 
 CREATE TABLE Vendor(
 username VARCHAR(20) , 
@@ -58,25 +44,106 @@ company_name VARCHAR(20),
 bank_acc_no VARCHAR(20), 
 admin_username VARCHAR(20),
 PRIMARY KEY (username),
-FOREIGN KEY(username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY(username) REFERENCES Users, --ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY(admin_username) REFERENCES Admins -- ON UPDATE CASCADE
 --TODO : Trigger ?
 --WHAT SHOULD WE DO HERE if an Admin is DELETED !? TAKE CARE
 );
 
-
 CREATE TABLE Delivery_Person(
 username VARCHAR(20), 
 is_activated BIT --NOT MENTIONED EXPLICITLY
 PRIMARY KEY (username),
-FOREIGN KEY (username) REFERENCES Users ON DELETE CASCADE ON UPDATE CASCADE
+FOREIGN KEY (username) REFERENCES Users  --ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+GO
+--DROP TRIGGER Admin_delete
+CREATE TRIGGER Admin_delete
+ON Admins
+INSTEAD OF DELETE
+AS
+BEGIN
+DELETE FROM Vendor WHERE admin_username IN (SELECT username FROM DELETED)
+DELETE FROM Delivery WHERE username IN (SELECT username FROM DELETED)
+DELETE FROM Todays_Deals WHERE admin_username IN (SELECT username FROM DELETED)
+DELETE FROM Giftcard WHERE username IN (SELECT username FROM DELETED)
+DELETE FROM Admin_Customer_Giftcard WHERE admin_username IN (SELECT username FROM DELETED)
+DELETE FROM Admin_Delivery_Order WHERE admin_username IN (SELECT username FROM DELETED)
+DELETE FROM Admins WHERE username IN (SELECT username FROM DELETED)
+--DELETE FROM Users WHERE username IN (SELECT username FROM DELETED)
+END
+GO
+--drop trigger User_delete
+CREATE TRIGGER User_delete
+ON Users
+INSTEAD OF DELETE
+AS
+BEGIN
+DELETE FROM User_mobile_numbers WHERE username IN (SELECT username FROM DELETED)
+DELETE FROM User_Addresses WHERE username IN (SELECT username FROM DELETED)
+DELETE FROM Admins WHERE username IN (SELECT username FROM DELETED)
+DELETE FROM Vendor WHERE username IN (SELECT username FROM DELETED)
+DELETE FROM Customer WHERE username IN (SELECT username FROM DELETED)
+DELETE FROM Delivery_Person WHERE username IN (SELECT username FROM DELETED)
+DELETE FROM Users WHERE username IN (SELECT username FROM DELETED)
+END
+GO
+
+--drop trigger Customer_delete
+CREATE TRIGGER Customer_delete
+ON Customer
+INSTEAD OF DELETE
+AS
+BEGIN
+DELETE FROM Orders WHERE customer_name IN (SELECT username FROM DELETED);
+DELETE FROM Product WHERE customer_username IN (SELECT username FROM DELETED);
+DELETE FROM CustomerAddstoCartProduct WHERE customer_name IN (SELECT username FROM DELETED);
+DELETE FROM Customer_Question_Product WHERE customer_name IN (SELECT username FROM DELETED);
+DELETE FROM Wishlist WHERE username IN (SELECT username FROM DELETED);
+DELETE FROM Admin_Customer_Giftcard WHERE customer_name IN (SELECT username FROM DELETED);
+DELETE FROM Customer_CreditCard WHERE customer_name IN (SELECT username FROM DELETED);
+DELETE FROM Customer WHERE username IN (SELECT username FROM DELETED)
+END
+
+GO
+CREATE TRIGGER Vendor_delete
+ON Vendor
+INSTEAD OF DELETE
+AS
+BEGIN
+DELETE FROM Product WHERE vendor_username IN (SELECT username FROM DELETED)
+DELETE FROM Vendor WHERE username IN (SELECT username FROM DELETED)
+END
+
+GO
+--drop trigger DeliveryPerson_delete
+CREATE TRIGGER DeliveryPerson_delete
+ON Delivery_Person
+INSTEAD OF DELETE
+AS
+BEGIN
+--is admin_delivery_order true to be deleted ?
+DELETE FROM Admin_Delivery_Order WHERE delivery_username IN (SELECT username FROM DELETED)
+DELETE FROM Delivery_Person WHERE username IN (SELECT username FROM DELETED)
+END
+
+GO
+
+
+CREATE TABLE Giftcard(
+code VARCHAR(10),
+expiry_date DATETIME,
+amount INT, 
+username VARCHAR(20),
+PRIMARY KEY (code),
+FOREIGN KEY (username) REFERENCES Admins --ON DELETE CASCADE ON UPDATE CASCADE
+);
 
 CREATE TABLE Credit_Card(
 number VARCHAR(20),
-expiry_date VARCHAR(10),--what ?, 
-cvv_code VARCHAR(20)	--WHAT-- habda mny 	
+expiry_date DATE,--what ?, 
+cvv_code VARCHAR(4),
 PRIMARY KEY (number)
 );
 
@@ -88,7 +155,7 @@ fees DECIMAL (5,3) NOT NULL,
 username VARCHAR(20),
 delivery_type VARCHAR(20),  --exists in MS2 inputs , doesn't exist in ERD / Schema !!
 PRIMARY KEY (id),
-FOREIGN KEY (username) REFERENCES Admins ON DELETE CASCADE ON UPDATE CASCADE -- IS THIS TRUE !?
+FOREIGN KEY (username) REFERENCES Admins  --ON DELETE CASCADE ON UPDATE CASCADE -- IS THIS TRUE !?
 );
 
 
@@ -110,10 +177,10 @@ customer_name VARCHAR(20),
 delivery_id INT, 
 creditCard_number VARCHAR(20),
 PRIMARY KEY (order_no),
-FOREIGN KEY (Gift_Card_code_used) REFERENCES Giftcard ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY (customer_name) REFERENCES Customer ON DELETE CASCADE ON UPDATE CASCADE, -- if a customer is deleted; then all his orders should be deleted ?
-FOREIGN KEY (delivery_id) REFERENCES Delivery,-- ON DELETE CASCADE ON UPDATE CASCADE, -- is it so?,
-FOREIGN KEY (creditCard_number) REFERENCES Credit_Card ON DELETE CASCADE ON UPDATE CASCADE 
+FOREIGN KEY (Gift_Card_code_used) REFERENCES Giftcard ON DELETE SET NULL ON UPDATE CASCADE,
+FOREIGN KEY (customer_name) REFERENCES Customer,-- ON DELETE CASCADE ON UPDATE CASCADE, -- if a customer is deleted; then all his orders should be deleted ?
+FOREIGN KEY (delivery_id) REFERENCES Delivery ON DELETE SET NULL ON UPDATE CASCADE, -- is it so?,
+FOREIGN KEY (creditCard_number) REFERENCES Credit_Card ON DELETE NO ACTION ON UPDATE CASCADE 
 	-- I THINK THE LAST SHOULD BE NO ACTION ???
 );
 
@@ -134,8 +201,8 @@ vendor_username VARCHAR(20),
 customer_username VARCHAR(20), 
 customer_order_id INT,
 PRIMARY KEY(serial_no),
-FOREIGN KEY(vendor_username) REFERENCES Vendor ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY (cutsomer_username) REFERENCES Customer ON DELETE CASCADE ON UPDATE CASCADE, 
+FOREIGN KEY(vendor_username) REFERENCES Vendor, --ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (customer_username) REFERENCES Customer, -- ON DELETE CASCADE ON UPDATE CASCADE, 
 -- fl schema msh m3mola dashed line enaha foreign key ezay ????!
 -- YOU ARE RIGHT AROSI <3 
 FOREIGN KEY(customer_order_id) REFERENCES Orders --ON DELETE CASCADE ON UPDATE CASCADE
@@ -157,7 +224,7 @@ deal_amount INT,
 expiry_date DATETIME,
 admin_username VARCHAR(20),
 PRIMARY KEY (deal_id),
-FOREIGN KEY (admin_username) REFERENCES Admins ON DELETE CASCADE ON UPDATE CASCADE
+FOREIGN KEY (admin_username) REFERENCES Admins --ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 
@@ -203,19 +270,8 @@ CREATE TABLE Wishlist(
 username VARCHAR (20),
 name VARCHAR (20),
 PRIMARY KEY (username , name),
-FOREIGN KEY (username) REFERENCES Customer ON DELETE CASCADE ON UPDATE CASCADE
+FOREIGN KEY (username) REFERENCES Customer -- ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-
-CREATE TABLE Giftcard(
-code VARCHAR(10),
-expiry_date DATETIME,
-amount INT, 
-username VARCHAR(20),
-PRIMARY KEY (code),
-FOREIGN KEY (username) REFERENCES Admins ON DELETE CASCADE ON UPDATE CASCADE
-);
-
 
 CREATE TABLE Wishlist_Product(
 username VARCHAR (20),
@@ -246,15 +302,13 @@ delivery_window VARCHAR (50),	--(c) in page 7
 PRIMARY KEY (delivery_username,order_no),
 FOREIGN KEY (delivery_username) REFERENCES Delivery_person,-- ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (order_no) REFERENCES Orders , -- ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY (admin_username) REFERENCES Admins ON DELETE CASCADE ON UPDATE CASCADE);
-
+FOREIGN KEY (admin_username) REFERENCES Admins --ON DELETE CASCADE ON UPDATE CASCADE);
+);
 
 CREATE TABLE Customer_CreditCard(
 customer_name VARCHAR(20), 
 cc_number VARCHAR (20),
 PRIMARY KEY (customer_name,cc_number),
-FOREIGN KEY (customer_name) REFERENCES Customer ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (customer_name) REFERENCES Customer ,-- ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (cc_number) REFERENCES Credit_Card ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-

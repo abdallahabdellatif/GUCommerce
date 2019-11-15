@@ -1,4 +1,5 @@
-﻿CREATE FUNCTION userLogin(@username VARCHAR(20), @password VARCHAR(20)) --a function better than proc?
+﻿
+CREATE FUNCTION userLogin(@username VARCHAR(20), @password VARCHAR(20)) --a function better than proc?
 RETURNS @tuple TABLE(success BIT,type SMALLINT) -- Es wants to make smallint INT as in the MS2 to be SAFE
 AS
 BEGIN 
@@ -16,12 +17,14 @@ ELSE IF(EXISTS(SELECT * FROM Vendor WHERE username=@username))
 SET @t=1
 ELSE IF(EXISTS(SELECT * FROM Admins WHERE username=@username))
 SET @t=2
-ELSE 
+ELSE IF(EXISTS(SELECT * FROM Delivery_Person WHERE username=@username))
 SET @t=3
 End
 ELSE
+BEGIN
 SET @s='0'
 SET @t=-1 -- eshme3na 1 !?  :v :v 
+END
 INSERT INTO @tuple VALUES(@s,@t)
 RETURN
 END
