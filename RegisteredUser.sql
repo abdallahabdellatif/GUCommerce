@@ -47,6 +47,6 @@ CREATE PROC addAddress --c
 @address VARCHAR(100)
 AS
 BEGIN 
-INSERT INTO User_Address VALUES(@address,@username)
+INSERT INTO User_Addresses VALUES(@address,@username)
 END
 
