@@ -151,21 +151,13 @@ CREATE PROC showWishlistProduct --h
 @customername varchar(20), @name varchar(20)
 AS 
 BEGIN
-SELECT *				-- this will just show : customerName and WishlistName !
-FROM Wishlist						
-WHERE username=@customername AND name=@name
-END
-GO
-CREATE PROC showWishlistProduct --h
-@customername varchar(20), @name varchar(20)
-AS 
-BEGIN
-SELECT P.*				-- Is this correct ?
+SELECT P
 FROM Wishlist W INNER JOIN Wishlist_Product WP 
 ON W.username=WP.username AND W.name=WP.wish_name
 INNER JOIN Product P ON P.serial_no=WP.serial_no
 WHERE W.username=@customername AND W.name=@name
 END
+
 GO
 CREATE PROC  viewMyCart --i
 @customer varchar(20)
