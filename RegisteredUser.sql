@@ -1,6 +1,6 @@
 ﻿
 CREATE FUNCTION userLogin(@username VARCHAR(20), @password VARCHAR(20)) --a function better than proc?
-RETURNS @tuple TABLE(success BIT,type SMALLINT) -- Es wants to make smallint INT as in the MS2 to be SAFE
+RETURNS @tuple TABLE(success BIT,[type] SMALLINT) -- Es wants to make smallint INT as in the MS2 to be SAFE
 AS
 BEGIN 
 DECLARE @s BIT 
@@ -8,7 +8,7 @@ DECLARE @t SMALLINT
 IF(EXISTS(
 SELECT *
 FROM Users
-WHERE username=@username AND password=@password))
+WHERE username=@username AND [password]=@password))
 BEGIN
 SET @s='1'
 IF(EXISTS(SELECT * FROM Customer WHERE username=@username))

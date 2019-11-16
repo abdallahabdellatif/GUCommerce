@@ -153,9 +153,9 @@ AS
 BEGIN
 SELECT P
 FROM Wishlist W INNER JOIN Wishlist_Product WP 
-ON W.username=WP.username AND W.name=WP.wish_name
+ON W.username=WP.username AND W.[name]=WP.wish_name
 INNER JOIN Product P ON P.serial_no=WP.serial_no
-WHERE W.username=@customername AND W.name=@name
+WHERE W.username=@customername AND W.[name]=@name
 END
 
 GO
@@ -208,7 +208,7 @@ AS
 BEGIN
 IF order_status ='not processed' or order_status='in process'
 DELETE FROM Orders
-WHERE order_no=@orderid
+WHERE order_no=@orderid				--refund ?
 ELSE
 PRINT 'no can dosville baby doll'
 END
@@ -226,7 +226,7 @@ END
 
 GO
 CREATE PROC ShowproductsIbought --m
-@customername varchar(20)
+@customername VARCHAR(20)
 AS
 BEGIN
 SELECT *
@@ -236,7 +236,7 @@ END
 
 GO
 CREATE PROC rate --n
-@serialno int, @rate int , @customername varchar(20)
+@serialno INT, @rate INT , @customername VARCHAR(20)
 AS
 BEGIN
 UPDATE Product
@@ -246,7 +246,7 @@ END
 
 GO
 CREATE PROC SpecifyAmount --o ana habed be nesbet 60%
-@customername varchar(20), @orderID int, @cash decimal(10,2), @credit decimal(10,2)
+@customername VARCHAR(20), @orderID INT, @cash DECIMAL(10,2), @credit DECIMAL(10,2)
 AS
 BEGIN 
 IF @cash + @credit <total_amount
@@ -278,7 +278,7 @@ END
 
 GO
 CREATE PROC ChooseCreditCard --p
-@creditcard varchar(20), @orderid int
+@creditcard VARCHAR(20), @orderid INT
 AS
 BEGIN
 UPDATE Orders
@@ -314,7 +314,7 @@ END
 
 GO
 CREATE PROC trackRemainingDays --s
-@orderid int, @customername varchar(20), --el input customername malosh lazma
+@orderid INT, @customername VARCHAR(20), --el input customername malosh lazma
 @days INT OUTPUT                      --fa homa 7atino leh
 AS                                     --fa 8aleban ely ana 3amlo 8alat
 BEGIN
@@ -339,7 +339,7 @@ END
 
 GO
 CREATE PROC recommmend --t
-@customername varchar(20)-- mesh ader akamel 
+@customername VARCHAR(20)-- mesh ader akamel 
 AS                         --انتظرونا في حلقة قادمة مع برنامج شبراوي للهبد
 BEGIN
 DECLARE @maxca1 VARCHAR(20)

@@ -166,32 +166,3 @@ SET @newPrice = @price - @offerAmount
 UPDATE Product
 SET final_price = @newPrice
 WHERE serial_number=@serial
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

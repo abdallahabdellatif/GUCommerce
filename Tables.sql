@@ -1,6 +1,6 @@
 CREATE TABLE Users(
 username VARCHAR(20), 
-password VARCHAR(20),
+[password] VARCHAR(20),
 first_name VARCHAR(20), 
 last_name VARCHAR(20),  
 email VARCHAR(50),
@@ -17,7 +17,7 @@ FOREIGN KEY(username) REFERENCES Users --ON DELETE CASCADE ON UPDATE CASCADE,
 );
 
 CREATE TABLE User_Addresses(
-address VARCHAR(100), 
+[address] VARCHAR(100), 
 username VARCHAR(20)
 PRIMARY KEY(address,username),
 FOREIGN KEY(username) REFERENCES Users -- ON DELETE CASCADE ON UPDATE CASCADE
@@ -133,7 +133,7 @@ GO
 
 CREATE TABLE Giftcard(
 code VARCHAR(10),
-expiry_date DATETIME,
+[expiry_date] DATETIME,
 amount INT, 
 username VARCHAR(20),
 PRIMARY KEY (code),
@@ -142,7 +142,7 @@ FOREIGN KEY (username) REFERENCES Admins --ON DELETE CASCADE ON UPDATE CASCADE
 
 CREATE TABLE Credit_Card(
 number VARCHAR(20),
-expiry_date DATE,--what ?, 
+[expiry_date] DATE,--what ?, 
 cvv_code VARCHAR(4),
 PRIMARY KEY (number)
 );
@@ -191,6 +191,7 @@ product_name VARCHAR(20),
 category VARCHAR(20),
 product_description text,
 -- in eerd they have 2 att. price and final_price ; but in schema only final_price
+price DECIMAL(10,2),
 final_price DECIMAL(10,2),	--On (a) and (c) in page 5
 color VARCHAR (20), 		--on (a) page 5
 available BIT , -- didn't mention type
@@ -221,7 +222,7 @@ FOREIGN KEY (customer_name) REFERENCES Customer --ON DELETE CASCADE ON UPDATE CA
 CREATE TABLE Todays_Deals(
 deal_id INT IDENTITY,
 deal_amount INT,
-expiry_date DATETIME,
+[expiry_date] DATETIME,
 admin_username VARCHAR(20),
 PRIMARY KEY (deal_id),
 FOREIGN KEY (admin_username) REFERENCES Admins --ON DELETE CASCADE ON UPDATE CASCADE
@@ -268,8 +269,8 @@ FOREIGN KEY (customer_name) REFERENCES Customer --ON DELETE CASCADE ON UPDATE CA
 
 CREATE TABLE Wishlist(
 username VARCHAR (20),
-name VARCHAR (20),
-PRIMARY KEY (username , name),
+[name] VARCHAR (20),
+PRIMARY KEY (username , [name]),
 FOREIGN KEY (username) REFERENCES Customer -- ON DELETE CASCADE ON UPDATE CASCADE
 );
 

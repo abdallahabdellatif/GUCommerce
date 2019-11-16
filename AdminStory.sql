@@ -37,10 +37,10 @@ WHERE order_no=@order_no
 
 GO
 CREATE PROC addDelivery --e
-@delivery_type varchar(20),
-@time_duration int,
-@fees decimal(5,3),
-@admin_username varchar(20)
+@delivery_type VARCHAR(20),
+@time_duration INT,
+@fees DECIMAL(5,3),
+@admin_username VARCHAR(20)
 AS
 INSERT INTO Delivery(time_duration, fees, username, delivery_type) --because ID can't be inserted so I 
 VALUES (@time_duration,@fees,@admin_username,@delivery_type)
@@ -50,9 +50,9 @@ VALUES (@time_duration,@fees,@admin_username,@delivery_type)
 
 GO
 CREATE PROC assignOrdertoDelivery --f ,, delivery window?? handled on Del_Per Story
-@delivery_username varchar(20),
-@order_no int,
-@admin_username varchar(20)
+@delivery_username VARCHAR(20),
+@order_no INT,
+@admin_username VARCHAR(20)
 AS
 INSERT INTO Admin_Delivery_Order(delivery_username,order_no,admin_username) 
 VALUES (@delivery_username,@order_no,@admin_username)
@@ -63,7 +63,7 @@ CREATE PROC createTodaysDeal --g1
 @admin_username VARCHAR(20),
 @expiry_date DATETIME
 AS
-INSERT INTO Todays_Deals (deal_amount, expiry_date, admin_username)
+INSERT INTO Todays_Deals (deal_amount, [expiry_date], admin_username)
 VALUES(@deal_amount ,@expiry_date,@admin_username)
 
 --g2,g3,g4,h,i left
@@ -80,7 +80,7 @@ IF ( EXISTS (
 	FROM Todays_Deals_Product TDP , Todays_Deals TD
 	WHERE TDP.serial_no=@serial_no AND 
 		TDP.deal_id=TD.deal_id AND 
-		TD.expiry_date>CURRENT_TIMESTAMP 
+		TD.[expiry_date]>CURRENT_TIMESTAMP 
 	)
 )
 	SET @activeDeal = '1'
@@ -104,7 +104,7 @@ CREATE PROC removeExpiredDeal	--g4
 AS
 BEGIN
 DELETE FROM Todays_Deals
-WHERE deal_id=@deal_iD AND expiry_date<CURRENT_TIMESTAMP
+WHERE deal_id=@deal_iD AND [expiry_date]<CURRENT_TIMESTAMP
 END
 
 GO

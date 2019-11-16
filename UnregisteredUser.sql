@@ -7,7 +7,7 @@
 AS 
 BEGIN 
 -- INSERT INTO Customer(username,first_name,last_name,pass,email)
-INSERT INTO Users(username,first_name,last_name,password,email)
+INSERT INTO Users(username,first_name,last_name,[password],email)
 VALUES(@username,@first_name,@last_name,@password,@email)
 INSERT INTO Customer(username,points)
 VALUES (@username,0)
@@ -24,7 +24,7 @@ CREATE PROC vendorRegister --b
  @bank_acc_no VARCHAR(20)
  AS
 BEGIN 
- INSERT INTO Users(username,first_name,last_name,password,email)--,company_name,bank_acc_no)
+ INSERT INTO Users(username,first_name,last_name,[password],email)--,company_name,bank_acc_no)
  VALUES(@username,@first_name,@last_name,@password,@email)--,@company_name,@bank_acc_no)
  INSERT INTO Vendor(username,activated,company_name,bank_acc_no)
  VALUES (@username,'0',@company_name,@bank_acc_no)

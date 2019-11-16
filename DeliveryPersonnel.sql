@@ -21,14 +21,14 @@ BEGIN
 UPDATE Users
 SET first_name=@first_name,
 last_name=@last_name,
-password=@password,
+[password]=@password,
 email=@email
 WHERE username=@username
 END;
 
 GO
 CREATE PROC viewmyorders	--NEW C
-@deliveryperson varchar(20)	--todoooo : there was something wrong in MS2 ; Some Mysterious another input !?
+@deliveryperson VARCHAR(20)	--todoooo : there was something wrong in MS2 ; Some Mysterious another input !?
 AS
 BEGIN
 SELECT O.*
