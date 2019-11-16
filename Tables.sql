@@ -1,3 +1,4 @@
+
 CREATE TABLE Users(
 username VARCHAR(20), 
 password VARCHAR(20),
@@ -58,6 +59,57 @@ FOREIGN KEY (username) REFERENCES Users  --ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 GO
+--drop trigger User_delete
+CREATE TRIGGER User_delete
+ON Users
+INSTEAD OF DELETE
+AS
+BEGIN
+DELETE FROM User_mobile_numbers WHERE username IN (SELECT username FROM DELETED)
+DELETE FROM User_Addresses WHERE username IN (SELECT username FROM DELETED)
+DELETE FROM Admins WHERE username IN (SELECT username FROM DELETED)
+DELETE FROM Vendor WHERE username IN (SELECT username FROM DELETED)
+DELETE FROM Customer WHERE username IN (SELECT username FROM DELETED)
+DELETE FROM Delivery_Person WHERE username IN (SELECT username FROM DELETED)
+DELETE FROM Users WHERE username IN (SELECT username FROM DELETED)
+END
+
+GO
+CREATE TRIGGER User_update
+ON Users
+AFTER UPDATE
+AS
+BEGIN
+IF UPDATE(username) 
+	BEGIN
+		UPDATE  User_mobile_numbers 
+			SET username = inserted.username 
+			FROM User_mobile_numbers,deleted,inserted 
+			WHERE deleted.username= User_mobile_numbers.username
+		UPDATE User_Addresses
+			SET username = inserted.username
+			FROM User_Addresses,deleted,inserted
+			WHERE deleted.username=User_Addresses.username
+		UPDATE Admins 
+			SET username = inserted.username
+			FROM Admins,deleted,inserted
+			WHERE deleted.username=Admins.username
+		UPDATE Vendor 
+			SET username = inserted.username
+			FROM Vendor,deleted,inserted
+			WHERE deleted.username=Vendor.username
+		UPDATE Customer 
+			SET username = inserted.username
+			FROM Customer,deleted,inserted
+			WHERE deleted.username=Customer.username
+		UPDATE Delivery_Person 
+			SET username = inserted.username
+			FROM Delivery_Person ,deleted,inserted
+			WHERE deleted.username=Delivery_Person.username
+	END
+END
+
+GO
 --DROP TRIGGER Admin_delete
 CREATE TRIGGER Admin_delete
 ON Admins
@@ -74,21 +126,43 @@ DELETE FROM Admins WHERE username IN (SELECT username FROM DELETED)
 --DELETE FROM Users WHERE username IN (SELECT username FROM DELETED)
 END
 GO
---drop trigger User_delete
-CREATE TRIGGER User_delete
-ON Users
-INSTEAD OF DELETE
+
+
+CREATE TRIGGER Admin_update
+ON Admins
+AFTER UPDATE
 AS
 BEGIN
-DELETE FROM User_mobile_numbers WHERE username IN (SELECT username FROM DELETED)
-DELETE FROM User_Addresses WHERE username IN (SELECT username FROM DELETED)
-DELETE FROM Admins WHERE username IN (SELECT username FROM DELETED)
-DELETE FROM Vendor WHERE username IN (SELECT username FROM DELETED)
-DELETE FROM Customer WHERE username IN (SELECT username FROM DELETED)
-DELETE FROM Delivery_Person WHERE username IN (SELECT username FROM DELETED)
-DELETE FROM Users WHERE username IN (SELECT username FROM DELETED)
+IF UPDATE(username)
+	BEGIN
+		UPDATE Vendor 
+			SET username = inserted.username
+			FROM Vendor,deleted,inserted
+			WHERE deleted.username=Vendor.username
+		UPDATE Delivery 
+			SET username = inserted.username
+			FROM Delivery,deleted,inserted
+			WHERE deleted.username=Delivery.username
+		UPDATE Todays_Deals 
+			SET admin_username = inserted.username
+			FROM Todays_Deals,deleted,inserted
+			WHERE deleted.username=Todays_Deals.admin_username
+		UPDATE Giftcard 
+			SET username = inserted.username
+			FROM Giftcard,deleted,inserted
+			WHERE deleted.username=Giftcard.username
+		UPDATE Admin_Customer_Giftcard 
+			SET admin_username = inserted.username
+			FROM Admin_Customer_Giftcard ,deleted,inserted
+			WHERE deleted.username=Admin_Customer_Giftcard.admin_username
+		UPDATE Admin_Delivery_Order
+			SET admin_username = inserted.username
+			FROM Admin_Delivery_Order ,deleted,inserted
+			WHERE deleted.username=Admin_Customer_Giftcard.admin_username
+	END
 END
 GO
+
 
 --drop trigger Customer_delete
 CREATE TRIGGER Customer_delete
@@ -107,6 +181,46 @@ DELETE FROM Customer WHERE username IN (SELECT username FROM DELETED)
 END
 
 GO
+CREATE TRIGGER Customer_update
+ON Customer
+AFTER UPDATE
+AS
+BEGIN
+IF UPDATE(username)
+	BEGIN
+		UPDATE Orders 
+			SET customer_name = inserted.username
+			FROM Orders,inserted,deleted
+			WHERE deleted.username=Orders.customer_name
+		UPDATE Product 
+			SET customer_name = inserted.username
+			FROM Product,inserted,deleted
+			WHERE deleted.username=Product.customer_name
+		UPDATE CustomerAddstoCartProduct 
+			SET customer_name = inserted.username
+			FROM CustomerAddstoCartProduct ,inserted,deleted
+			WHERE deleted.username=CustomerAddstoCartProduct.customer_name
+		UPDATE Customer_Question_Product 
+			SET customer_name = inserted.username
+			FROM Customer_Question_Product ,inserted,deleted
+			WHERE deleted.username=Customer_Question_Product.customer_name
+		UPDATE Wishlist 
+			SET username = inserted.username
+			FROM Wishlist,inserted,deleted
+			WHERE deleted.username=Wishlist.customer_name		
+		UPDATE Admin_Customer_Giftcard 
+			SET customer_name = inserted.username
+			FROM Admin_Customer_Giftcard, inserted,deleted
+			WHERE deleted.username=Admin_Customer_Giftcard.customer_name
+		UPDATE Customer_CreditCard 
+			SET customer_name = inserted.username
+			FROM Customer_CreditCard , inserted,deleted
+			WHERE deleted.username=Customer_CreditCard.customer_name
+	END
+END
+
+
+GO
 CREATE TRIGGER Vendor_delete
 ON Vendor
 INSTEAD OF DELETE
@@ -115,6 +229,22 @@ BEGIN
 DELETE FROM Product WHERE vendor_username IN (SELECT username FROM DELETED)
 DELETE FROM Vendor WHERE username IN (SELECT username FROM DELETED)
 END
+
+GO
+CREATE TRIGGER Vendor_update
+ON Vendor
+AFTER UPDATE
+AS
+BEGIN
+IF UPDATE(username)
+	BEGIN
+		UPDATE Product 
+			SET vendor_username=inserter.username
+			FROM Product,inserted,deleted
+			WHERE deleted.username=Product.vendor_username
+	END
+END
+
 
 GO
 --drop trigger DeliveryPerson_delete
@@ -129,8 +259,22 @@ DELETE FROM Delivery_Person WHERE username IN (SELECT username FROM DELETED)
 END
 
 GO
+CREATE TRIGGER DeliveryPerson_update
+ON Delivery_Person
+AFTER UPDATE
+AS
+BEGIN
+IF UPDATE(username)
+	BEGIN
+		UPDATE Admin_Delivery_Order 
+			SET delivery_username=inserted.username
+			FROM Admin_Delivery_Order, inserted, deleted
+			WHERE deleted.username=Admin_Delivery_Order.delivery_username
+	END
+END
 
 
+GO
 CREATE TABLE Giftcard(
 code VARCHAR(10),
 expiry_date DATETIME,
@@ -205,7 +349,7 @@ FOREIGN KEY(vendor_username) REFERENCES Vendor, --ON DELETE CASCADE ON UPDATE CA
 FOREIGN KEY (customer_username) REFERENCES Customer, -- ON DELETE CASCADE ON UPDATE CASCADE, 
 -- fl schema msh m3mola dashed line enaha foreign key ezay ????!
 -- YOU ARE RIGHT AROSI <3 
-FOREIGN KEY(customer_order_id) REFERENCES Orders --ON DELETE CASCADE ON UPDATE CASCADE
+FOREIGN KEY(customer_order_id) REFERENCES Orders ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 
@@ -233,7 +377,7 @@ deal_id INT,
 serial_no INT,
 issue_date DATETIME, ---- didn't state type
 PRIMARY KEY (deal_id ,serial_no),
-FOREIGN KEY (deal_id) REFERENCES Todays_Deals , --ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (deal_id) REFERENCES Todays_Deals ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (serial_no) REFERENCES Product ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -279,7 +423,7 @@ wish_name VARCHAR (20),
 serial_no INT,
 PRIMARY KEY (username , wish_name , serial_no),
 FOREIGN KEY (username , wish_name) REFERENCES WishList ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY (serial_no) REFERENCES Product --ON DELETE CASCADE ON UPDATE CASCADE
+FOREIGN KEY (serial_no) REFERENCES Product ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE Admin_Customer_Giftcard(
@@ -301,7 +445,7 @@ admin_username VARCHAR (20),
 delivery_window VARCHAR (50),	--(c) in page 7
 PRIMARY KEY (delivery_username,order_no),
 FOREIGN KEY (delivery_username) REFERENCES Delivery_person,-- ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY (order_no) REFERENCES Orders , -- ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (order_no) REFERENCES Orders ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (admin_username) REFERENCES Admins --ON DELETE CASCADE ON UPDATE CASCADE);
 );
 
