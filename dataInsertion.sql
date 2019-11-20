@@ -21,9 +21,6 @@ VALUES('hana.aly')
 INSERT INTO Customer
 VALUES('ammar.yasser',15)
 
---cart
-INSERT INTO CustomerAddstoCartProduct
-VALUES(1,'ammar.yasser')
 
 select *
 from Vendor
@@ -70,6 +67,10 @@ INSERT INTO Product(serial_no, product_name, category, product_description, pric
 VALUES(4,'Blue pen','stationary','useful pen',10.0,10.0,'Blue',0,0,'hadeel.adel',null,null);
 SET IDENTITY_INSERT Product OFF;
 
+--cart
+INSERT INTO CustomerAddstoCartProduct
+VALUES(1,'ammar.yasser')
+
 -- Todays Deals
 SET IDENTITY_INSERT Todays_Deals ON;
 INSERT INTO Todays_Deals(deal_id ,deal_amount ,expiry_date,admin_username)
@@ -103,11 +104,26 @@ VALUES('ammar.yasser','fashion',1)
 INSERT INTO Wishlist_Product
 VALUES('ammar.yasser','fashion',4)
 TRUNCATE TABLE Wishlist_Product;
-/*INSERT INTO Giftcard
-VALUES('G101','18/11/2019',100, na2es le admin username bs msh mwgood fl insertion data) */
+
+-- Giftcard
+INSERT INTO Giftcard (code,expiry_date,amount)
+VALUES('G101','2019-11-18',100)-- na2es le admin username bs msh mwgood fl insertion data) 
 
 --Customer credit card
 INSERT INTO Customer_CreditCard
 VALUES('ammar.yasser','4444-5555-6666-8888')
 
 
+SELECT * FROM Users
+SELECT * FROM Customer
+SELECT * FROM Vendor
+SELECT * FROM Admins
+SELECT * FROM Delivery_Person
+SELECT * FROM Delivery
+SELECT * FROM Product
+SELECT * FROM Todays_Deals
+SELECT * FROM offer
+SELECT * FROM Wishlist
+SELECT * FROM Wishlist_Product	-- need to do
+SELECT * FROM Giftcard
+SELECT * FROM Customer_CreditCard
