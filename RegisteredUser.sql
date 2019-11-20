@@ -1,31 +1,34 @@
-﻿CREATE FUNCTION userLogin(@username VARCHAR(20), @password VARCHAR(20)) --a function better than proc?
-RETURNS @tuple TABLE(success BIT,type SMALLINT) -- Es wants to make smallint INT as in the MS2 to be SAFE
+﻿
+CREATE PROC userLogin
+@username VARCHAR(20), @password VARCHAR(20),@success BIT OUTPUT,@type INT OUTPUT
 AS
 BEGIN 
-DECLARE @s BIT 
-DECLARE @t SMALLINT
+--DECLARE @s BIT 
+--DECLARE @t SMALLINT
 IF(EXISTS(
 SELECT *
 FROM Users
 WHERE username=@username AND password=@password))
 BEGIN
-SET @s='1'
+SET @success='1'
 IF(EXISTS(SELECT * FROM Customer WHERE username=@username))
-SET @t=0
+SET @type=0
 ELSE IF(EXISTS(SELECT * FROM Vendor WHERE username=@username))
-SET @t=1
+SET @type=1
 ELSE IF(EXISTS(SELECT * FROM Admins WHERE username=@username))
-SET @t=2
+SET @type=2
 ELSE IF(EXISTS(SELECT * FROM Delivery_Person WHERE username=@username))
-SET @t=3
+SET @type=3
+print @success
+print @type
 End
 ELSE
 BEGIN
-SET @s='0'
-SET @t=-1 -- eshme3na 1 !?  :v :v 
+SET @success='0'
+print @success
+set @type=-1
+print @type
 END
-INSERT INTO @tuple VALUES(@s,@t)
-RETURN
 END
 
 
@@ -36,8 +39,12 @@ CREATE PROC addMobile --b
 @mobile_number VARCHAR(20)
 AS
 BEGIN 
+if(not exists(select * from User_mobile_numbers where username=@username AND mobile_number=@mobile_number))
+begin
 INSERT INTO User_mobile_numbers 
 VALUES(@mobile_number,@username)
+end
+select * from User_mobile_numbers where username=@username 
 END
 
 GO
@@ -46,5 +53,10 @@ CREATE PROC addAddress --c
 @address VARCHAR(100)
 AS
 BEGIN 
+if(not exists(select * from User_Addresses where username=@username AND address=@address))
+begin
 INSERT INTO User_Addresses VALUES(@address,@username)
+end
+select * from User_Addresses where username=@username 
 END
+
