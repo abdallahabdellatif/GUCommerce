@@ -7,10 +7,15 @@
 AS 
 BEGIN 
 -- INSERT INTO Customer(username,first_name,last_name,pass,email)
+IF(not exists(select * from users where username=@username))
+begin
 INSERT INTO Users(username,first_name,last_name,password,email)
 VALUES(@username,@first_name,@last_name,@password,@email)
 INSERT INTO Customer(username,points)
 VALUES (@username,0)
+end
+SELECT * FROM Users
+SELECT * FROM Customer
 END
 
 GO 
@@ -24,8 +29,13 @@ CREATE PROC vendorRegister --b
  @bank_acc_no VARCHAR(20)
  AS
 BEGIN 
+IF(not exists(select * from users where username=@username))
+begin
  INSERT INTO Users(username,first_name,last_name,password,email)--,company_name,bank_acc_no)
  VALUES(@username,@first_name,@last_name,@password,@email)--,@company_name,@bank_acc_no)
  INSERT INTO Vendor(username,activated,company_name,bank_acc_no)
  VALUES (@username,'0',@company_name,@bank_acc_no)
+ end
+ SELECT * FROM Users
+ SELECT * FROM Vendor
 END
