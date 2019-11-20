@@ -26,7 +26,7 @@ FOREIGN KEY(username) REFERENCES Users -- ON DELETE CASCADE ON UPDATE CASCADE
 
 CREATE TABLE Customer(
 username VARCHAR(20), 
-points INT,							-- Not mentioned explicitly
+points INT ,
 -- should we add default value 0 for points ?
 PRIMARY KEY(username),
 FOREIGN KEY(username) REFERENCES Users --ON DELETE CASCADE ON UPDATE CASCADE
@@ -65,13 +65,13 @@ ON Users
 INSTEAD OF DELETE
 AS
 BEGIN
-DELETE FROM User_mobile_numbers WHERE username IN (SELECT username FROM DELETED)
-DELETE FROM User_Addresses WHERE username IN (SELECT username FROM DELETED)
-DELETE FROM Admins WHERE username IN (SELECT username FROM DELETED)
-DELETE FROM Vendor WHERE username IN (SELECT username FROM DELETED)
-DELETE FROM Customer WHERE username IN (SELECT username FROM DELETED)
-DELETE FROM Delivery_Person WHERE username IN (SELECT username FROM DELETED)
-DELETE FROM Users WHERE username IN (SELECT username FROM DELETED)
+	DELETE FROM User_mobile_numbers WHERE username IN (SELECT username FROM DELETED)
+	DELETE FROM User_Addresses WHERE username IN (SELECT username FROM DELETED)
+	DELETE FROM Admins WHERE username IN (SELECT username FROM DELETED)
+	DELETE FROM Vendor WHERE username IN (SELECT username FROM DELETED)
+	DELETE FROM Customer WHERE username IN (SELECT username FROM DELETED)
+	DELETE FROM Delivery_Person WHERE username IN (SELECT username FROM DELETED)
+	DELETE FROM Users WHERE username IN (SELECT username FROM DELETED)
 END
 
 GO
@@ -116,13 +116,13 @@ ON Admins
 INSTEAD OF DELETE
 AS
 BEGIN
-DELETE FROM Vendor WHERE admin_username IN (SELECT username FROM DELETED)
-DELETE FROM Delivery WHERE username IN (SELECT username FROM DELETED)
-DELETE FROM Todays_Deals WHERE admin_username IN (SELECT username FROM DELETED)
-DELETE FROM Giftcard WHERE username IN (SELECT username FROM DELETED)
-DELETE FROM Admin_Customer_Giftcard WHERE admin_username IN (SELECT username FROM DELETED)
-DELETE FROM Admin_Delivery_Order WHERE admin_username IN (SELECT username FROM DELETED)
-DELETE FROM Admins WHERE username IN (SELECT username FROM DELETED)
+	DELETE FROM Vendor WHERE admin_username IN (SELECT username FROM DELETED)
+	DELETE FROM Delivery WHERE username IN (SELECT username FROM DELETED)
+	DELETE FROM Todays_Deals WHERE admin_username IN (SELECT username FROM DELETED)
+	DELETE FROM Giftcard WHERE username IN (SELECT username FROM DELETED)
+	DELETE FROM Admin_Customer_Giftcard WHERE admin_username IN (SELECT username FROM DELETED)
+	DELETE FROM Admin_Delivery_Order WHERE admin_username IN (SELECT username FROM DELETED)
+	DELETE FROM Admins WHERE username IN (SELECT username FROM DELETED)
 --DELETE FROM Users WHERE username IN (SELECT username FROM DELETED)
 END
 GO
@@ -170,14 +170,14 @@ ON Customer
 INSTEAD OF DELETE
 AS
 BEGIN
-DELETE FROM Orders WHERE customer_name IN (SELECT username FROM DELETED);
-DELETE FROM Product WHERE customer_username IN (SELECT username FROM DELETED);
-DELETE FROM CustomerAddstoCartProduct WHERE customer_name IN (SELECT username FROM DELETED);
-DELETE FROM Customer_Question_Product WHERE customer_name IN (SELECT username FROM DELETED);
-DELETE FROM Wishlist WHERE username IN (SELECT username FROM DELETED);
-DELETE FROM Admin_Customer_Giftcard WHERE customer_name IN (SELECT username FROM DELETED);
-DELETE FROM Customer_CreditCard WHERE customer_name IN (SELECT username FROM DELETED);
-DELETE FROM Customer WHERE username IN (SELECT username FROM DELETED)
+	DELETE FROM Orders WHERE customer_name IN (SELECT username FROM DELETED);
+	DELETE FROM Product WHERE customer_username IN (SELECT username FROM DELETED);
+	DELETE FROM CustomerAddstoCartProduct WHERE customer_name IN (SELECT username FROM DELETED);
+	DELETE FROM Customer_Question_Product WHERE customer_name IN (SELECT username FROM DELETED);
+	DELETE FROM Wishlist WHERE username IN (SELECT username FROM DELETED);
+	DELETE FROM Admin_Customer_Giftcard WHERE customer_name IN (SELECT username FROM DELETED);
+	DELETE FROM Customer_CreditCard WHERE customer_name IN (SELECT username FROM DELETED);
+	DELETE FROM Customer WHERE username IN (SELECT username FROM DELETED)
 END
 
 GO
@@ -281,7 +281,7 @@ expiry_date DATETIME,
 amount INT, 
 username VARCHAR(20),
 PRIMARY KEY (code),
-FOREIGN KEY (username) REFERENCES Admins --ON DELETE CASCADE ON UPDATE CASCADE
+FOREIGN KEY (username) REFERENCES Admins
 );
 
 CREATE TABLE Credit_Card(
@@ -297,32 +297,30 @@ id INT IDENTITY, --Not mentioned explicitly
 time_duration INT NOT NULL, 
 fees DECIMAL (5,3) NOT NULL, 
 username VARCHAR(20),
-delivery_type VARCHAR(20),  --exists in MS2 inputs , doesn't exist in ERD / Schema !!
+delivery_type VARCHAR(20),  
+-- should we make it 2nd attr; to MATCH FinalSchema ?
 PRIMARY KEY (id),
-FOREIGN KEY (username) REFERENCES Admins  --ON DELETE CASCADE ON UPDATE CASCADE -- IS THIS TRUE !?
+FOREIGN KEY (username) REFERENCES Admins
 );
 
 
 CREATE TABLE Orders(
-order_no INT IDENTITY, -- identity is true,right ??
-order_date DATETIME, -- Not mentioned explicitly, 
-total_amount decimal(10,2), -- not mentioned explicilty ;
--- but price is decimal(10,2) del_fees is decimal(5,3), others are either(10,2) or int, 
---(j) on page 3 ; specifes that price of an order is DECIMAL(10,2);
-cash_amount DECIMAL(10,2), -- I think it is the as in (o) in page 4
-credit_amount DECIMAL(10,2), -- I think it is the as in (o) in page 4
-payment_type VARCHAR(20),  -- BALABIZO ;; WHAT IS THIS !!?
-order_status VARCHAR(20) DEFAULT 'not processed' ,	-- Ba3boos ;; is this right ?
---- بص ع السطر اللي فوق ^^
+order_no INT IDENTITY, 
+order_date DATETIME, 
+total_amount decimal(10,2), 
+cash_amount DECIMAL(10,2),
+credit_amount DECIMAL(10,2),
+payment_type VARCHAR(20), 
+order_status VARCHAR(20) DEFAULT 'not processed' ,	
 remaining_days INT,  -- Mentioned in (s) in page 4 
 time_limit VARCHAR(20) , 	--BALABIZO ;; WHAT IS THIS !!?
-Gift_Card_code_used VARCHAR(10),	--added in finSch(3) -- same type as CODE
+Gift_Card_code_used VARCHAR(10),
 customer_name VARCHAR(20), 
 delivery_id INT, 
 creditCard_number VARCHAR(20),
 PRIMARY KEY (order_no),
 FOREIGN KEY (Gift_Card_code_used) REFERENCES Giftcard ON DELETE SET NULL ON UPDATE CASCADE,
-FOREIGN KEY (customer_name) REFERENCES Customer,-- ON DELETE CASCADE ON UPDATE CASCADE, -- if a customer is deleted; then all his orders should be deleted ?
+FOREIGN KEY (customer_name) REFERENCES Customer,
 FOREIGN KEY (delivery_id) REFERENCES Delivery ON DELETE SET NULL ON UPDATE CASCADE, -- is it so?,
 FOREIGN KEY (creditCard_number) REFERENCES Credit_Card ON DELETE NO ACTION ON UPDATE CASCADE 
 	-- I THINK THE LAST SHOULD BE NO ACTION ???
@@ -344,7 +342,7 @@ customer_order_id INT,
 PRIMARY KEY(serial_no),
 FOREIGN KEY(vendor_username) REFERENCES Vendor, --ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (customer_username) REFERENCES Customer, -- ON DELETE CASCADE ON UPDATE CASCADE, 
-FOREIGN KEY(customer_order_id) REFERENCES Orders ON DELETE CASCADE ON UPDATE CASCADE
+FOREIGN KEY(customer_order_id) REFERENCES Orders ON DELETE CASCADE ON UPDATE CASCADE 
 );
 
 
