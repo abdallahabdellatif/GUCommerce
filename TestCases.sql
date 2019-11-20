@@ -2,7 +2,7 @@
 
 -- Customer​:
 
-EXEC customerRegister  ​'ahmed.ashraf' ,​ ' ahmed',  ​ ​'ashraf',   ​ 'pass123', '​ahmed@yahoo.com' 
+EXEC customerRegister  ​'ahmed.ashraf' ,​ ' ahmed',  ​ ​'ashraf',   ​ 'pass123', '​ahmed@yahoo.com'
 
 
 EXEC vendorRegister  'eslam.mahmod', 'eslam' ​, 'mahmod',​ 'pass1234', 
