@@ -56,18 +56,24 @@ VALUES (@time_duration,@fees,@admin_username,@delivery_type)
 
 
 GO
-CREATE PROC assignOrdertoDelivery --f ,, delivery window?? handled on Del_Per Story
+CREATE PROC assignOrdertoDelivery --f
 @delivery_username varchar(20),
 @order_no int,
 @admin_username varchar(20)
 AS
-IF(@delivery_username IN(SELECT username FROM Delivery_Person) AND
-@order_no IN(SELECT order_no FROM Orders) AND
-@admin_username IN(SELECT username FROM Admins)AND
-(NOT EXISTS (SELECT delivery_username,order_no FROM Admin_Delivery_Order 
-WHERE @delivery_username=delivery_username AND @order_no=order_no)))
-INSERT INTO Admin_Delivery_Order(delivery_username,order_no,admin_username) 
-VALUES (@delivery_username,@order_no,@admin_username)
+BEGIN
+	IF(@delivery_username IN(SELECT username FROM Delivery_Person) 
+		AND @order_no IN(SELECT order_no FROM Orders)
+		AND @admin_username IN(SELECT username FROM Admins)
+		AND (NOT EXISTS (SELECT delivery_username,order_no FROM Admin_Delivery_Order 
+						WHERE @delivery_username=delivery_username AND @order_no=order_no)
+			)
+		)
+		BEGIN
+			INSERT INTO Admin_Delivery_Order(delivery_username,order_no,admin_username) 
+				VALUES (@delivery_username,@order_no,@admin_username)
+		END
+END
 
 GO
 CREATE PROC createTodaysDeal --g1
@@ -75,12 +81,13 @@ CREATE PROC createTodaysDeal --g1
 @admin_username VARCHAR(20),
 @expiry_date DATETIME
 AS
-IF(@admin_username IN(SELECT username FROM Admins))
-INSERT INTO Todays_Deals (deal_amount, expiry_date, admin_username)
-VALUES(@deal_amount ,@expiry_date,@admin_username)
-
---g2,g3,g4,h,i left
---ESLAM Do the following:
+BEGIN
+	IF(@admin_username IN(SELECT username FROM Admins))
+		BEGIN
+			INSERT INTO Todays_Deals (deal_amount, expiry_date, admin_username)
+				VALUES(@deal_amount ,@expiry_date,@admin_username)
+		END
+END
 
 GO 
 CREATE PROC checkTodaysDealOnProduct	--g2
@@ -88,17 +95,17 @@ CREATE PROC checkTodaysDealOnProduct	--g2
 @activeDeal BIT OUTPUT
 AS
 BEGIN
-IF ( EXISTS (
-	SELECT *
-	FROM Todays_Deals_Product TDP , Todays_Deals TD
-	WHERE TDP.serial_no=@serial_no AND 
-		TDP.deal_id=TD.deal_id AND 
-		TD.expiry_date>CURRENT_TIMESTAMP 
+	IF ( EXISTS (
+		SELECT *
+		FROM Todays_Deals_Product TDP , Todays_Deals TD
+		WHERE TDP.serial_no=@serial_no AND 
+			TDP.deal_id=TD.deal_id AND 
+			TD.expiry_date>CURRENT_TIMESTAMP 
+		)
 	)
-)
-	SET @activeDeal = '1'
-ELSE
-	SET @activeDeal = '0'
+		SET @activeDeal = '1'
+	ELSE
+		SET @activeDeal = '0'
 END
 
 GO
@@ -107,11 +114,11 @@ CREATE PROC addTodaysDealOnProduct	--g3
 @serial_no INT
 AS
 BEGIN
-IF(@serial_no IN(SELECT serial_no FROM Product)AND
-@deal_id NOT IN(SELECT deal_id FROM Todays_Deals_Product)AND
-@deal_id IN(SELECT deal_id FROM Todays_Deals))
-INSERT INTO Todays_Deals_Product
-VALUES (@deal_id,@serial_no,CURRENT_TIMESTAMP)
+	IF(@serial_no IN(SELECT serial_no FROM Product)AND
+	@deal_id NOT IN(SELECT deal_id FROM Todays_Deals_Product)AND
+	@deal_id IN(SELECT deal_id FROM Todays_Deals))
+		INSERT INTO Todays_Deals_Product
+			VALUES (@deal_id,@serial_no,CURRENT_TIMESTAMP)
 END
 
 GO
@@ -119,8 +126,8 @@ CREATE PROC removeExpiredDeal	--g4
 @deal_iD int
 AS
 BEGIN
-DELETE FROM Todays_Deals
-WHERE deal_id=@deal_iD AND expiry_date<CURRENT_TIMESTAMP
+	DELETE FROM Todays_Deals
+		WHERE deal_id=@deal_iD AND expiry_date<CURRENT_TIMESTAMP
 END
 
 GO
@@ -131,10 +138,10 @@ CREATE PROC createGiftCard	--h
 @admin_username VARCHAR(20)
 AS
 BEGIN
-IF(@admin_username IN(SELECT username FROM Admins)AND
-@code NOT IN(SELECT code FROM Giftcard))
-INSERT INTO Giftcard
-VALUES(@code,@expiry_date,@amount,@admin_username)
+	IF(@admin_username IN(SELECT username FROM Admins)AND
+	@code NOT IN(SELECT code FROM Giftcard))
+		INSERT INTO Giftcard
+			VALUES(@code,@expiry_date,@amount,@admin_username)
 END
 
 GO
@@ -142,33 +149,34 @@ CREATE PROC removeExpiredGiftCard --I1
 @code VARCHAR(10)
 AS
 BEGIN
-DECLARE @rempo INT
-SELECT @rempo=remaining_points
-FROM Admin_Customer_Giftcard
-WHERE code=@code
+	DECLARE @rempo INT
+	SELECT @rempo=remaining_points
+		FROM Admin_Customer_Giftcard
+		WHERE code=@code
 
-UPDATE Customer  -- mesh sha8al
-SET points=points-@rempo
-FROM Customer INNER JOIN Admin_Customer_Giftcard a ON username=a.customer_name
-WHERE a.code=@code
+	UPDATE Customer  -- mesh sha8al
+		SET points=points-@rempo			-- may try set points = (SELECT points....) - @rempo ?
+		FROM Customer INNER JOIN Admin_Customer_Giftcard a ON username=a.customer_name
+		WHERE a.code=@code
 
-DELETE FROM Admin_Customer_Giftcard
-WHERE code IN (SELECT code FROM Giftcard WHERE @code=code AND CURRENT_TIMESTAMP >expiry_date)
+	DELETE FROM Admin_Customer_Giftcard
+		WHERE code IN (SELECT code FROM Giftcard WHERE @code=code AND CURRENT_TIMESTAMP >expiry_date)
 
-DELETE FROM Giftcard
-WHERE CURRENT_TIMESTAMP >expiry_date AND @code =code
+	DELETE FROM Giftcard
+		WHERE CURRENT_TIMESTAMP >expiry_date AND @code =code
 END
 --i2
+
 GO --ana mesh fahem howa 3ayez eh fa hal haza sa7i7
 CREATE PROC checkGiftCardOnCustomer
 @code VARCHAR(10),
 @activeGiftCard BIT OUTPUT
 AS
 BEGIN
-IF(EXISTS(SELECT customer_name FROM Admin_Customer_Giftcard WHERE code=@code))
-SET @activeGiftCard='1'
-ELSE
-SET @activeGiftCard='0'
+	IF(EXISTS(SELECT customer_name FROM Admin_Customer_Giftcard WHERE code=@code))
+		SET @activeGiftCard='1'
+	ELSE
+		SET @activeGiftCard='0'
 END
 
 GO
@@ -178,27 +186,27 @@ CREATE PROC giveGiftCardtoCustomer --i3
 @admin_username VARCHAR(20)
 AS
 BEGIN
-DECLARE @cardAmount INT;
-SELECT @cardAmount = amount
-FROM Giftcard 
-WHERE code=@code;
-IF(@admin_username IN(SELECT username FROM Admins) AND
-@customer_name IN (SELECT username FROM Customer) AND
-@code NOT IN(SELECT code FROM Admin_Customer_Giftcard) AND
-@code IN(SELECT code FROM Giftcard))
-BEGIN
-INSERT INTO Admin_Customer_Giftcard
-VALUES(@code,@customer_name,@admin_username,@cardAmount);
+	DECLARE @cardAmount INT;
+	SELECT @cardAmount = amount
+		FROM Giftcard 
+		WHERE code=@code;
 
-DECLARE @oldpoints INT
-SELECT @oldpoints=points
-FROM Customer
-WHERE username=@customer_name
+	IF(@admin_username IN(SELECT username FROM Admins) AND
+	@customer_name IN (SELECT username FROM Customer) AND
+	@code NOT IN(SELECT code FROM Admin_Customer_Giftcard) AND
+	@code IN(SELECT code FROM Giftcard))
+	BEGIN
+		INSERT INTO Admin_Customer_Giftcard
+			VALUES(@code,@customer_name,@admin_username,@cardAmount);
 
-UPDATE Customer --mesh sha8al
-SET points=@oldpoints+@cardAmount
-WHERE username=@customer_name
+		DECLARE @oldpoints INT
+		SELECT @oldpoints=points
+			FROM Customer
+			WHERE username=@customer_name
 
-END
+		UPDATE Customer --mesh sha8al
+			SET points=@oldpoints+@cardAmount
+			WHERE username=@customer_name
+	END
 END
 
