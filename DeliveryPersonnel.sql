@@ -27,16 +27,6 @@ WHERE username=@username
 END;
 
 GO
-CREATE PROC viewmyorders	--NEW C
-@deliveryperson varchar(20)	--todoooo : there was something wrong in MS2 ; Some Mysterious another input !?
-AS
-BEGIN
-SELECT O.*
-FROM  Orders O INNER JOIN  Admin_Delivery_Order ADO ON O.order_no = ADO.order_no
-WHERE ADO.delivery_username = @deliveryperson
-END
-
-GO
 --c
 CREATE PROC specifyDeliveryWindow
 @delivery_username VARCHAR(20),

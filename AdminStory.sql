@@ -120,19 +120,7 @@ VALUES(@code,@expiry_date,@amount,@admin_username)
 END
 
 GO
-CREATE PROC removeExpiredGiftCard --I1
-@code VARCHAR(10)
-AS
-BEGIN
-
---TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-
-
-END
-
-
-GO
-CREATE PROC giveGiftCardtoCustomer --i3
+CREATE PROC giveGiftCardtoCustomer --i
 @code VARCHAR(10),
 @customer_name VARCHAR(20),
 @admin_username VARCHAR(20)

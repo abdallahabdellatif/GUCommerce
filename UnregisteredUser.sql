@@ -13,20 +13,6 @@ INSERT INTO Customer(username,points)
 VALUES (@username,0)
 END
 
-GO
-CREATE Trigger UserReg --if username already exists
-ON Users
-INSTEAD OF INSERT
-AS
-BEGIN
-IF (EXISTS(select * from Users u,Inserted i where i.username=u.username ))
-BEGIN
-RAISERROR('This username already exists.',16,1)
-ROLLBACK TRANSACTION
-END
-END
-
-
 GO 
 CREATE PROC vendorRegister --b
  @username VARCHAR(20),

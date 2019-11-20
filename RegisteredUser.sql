@@ -1,6 +1,5 @@
-﻿GO
-CREATE FUNCTION userLogin(@username VARCHAR(20), @password VARCHAR(20)) --a function better than proc?
-RETURNS @tuple TABLE(success BIT,type SMALLINT) -- Es wants to make smallint INT as in the MS2 to be SAFE ,abdo denies permission
+﻿CREATE FUNCTION userLogin(@username VARCHAR(20), @password VARCHAR(20)) --a function better than proc?
+RETURNS @tuple TABLE(success BIT,type SMALLINT) -- Es wants to make smallint INT as in the MS2 to be SAFE
 AS
 BEGIN 
 DECLARE @s BIT 
@@ -17,21 +16,15 @@ ELSE IF(EXISTS(SELECT * FROM Vendor WHERE username=@username))
 SET @t=1
 ELSE IF(EXISTS(SELECT * FROM Admins WHERE username=@username))
 SET @t=2
-ELSE IF(EXISTS(SELECT * FROM Delivery_Person WHERE username=@username))
+ELSE 
 SET @t=3
 End
 ELSE
-BEGIN
 SET @s='0'
-SET @t= -1 -- eshme3na 1 !?  :v :v 
-END
+SET @t=-1 -- eshme3na 1 !?  :v :v 
 INSERT INTO @tuple VALUES(@s,@t)
 RETURN
 END
-
---CREATE TRIGGER WrongUserorPass --in this ms?
---OF Users
---AFTER 
 
 
 
@@ -51,6 +44,6 @@ CREATE PROC addAddress --c
 @address VARCHAR(100)
 AS
 BEGIN 
-INSERT INTO User_Addresses VALUES(@address,@username)
+INSERT INTO User_Address VALUES(@address,@username)
 END
 
