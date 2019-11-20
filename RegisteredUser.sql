@@ -16,12 +16,14 @@ ELSE IF(EXISTS(SELECT * FROM Vendor WHERE username=@username))
 SET @t=1
 ELSE IF(EXISTS(SELECT * FROM Admins WHERE username=@username))
 SET @t=2
-ELSE 
+ELSE IF(EXISTS(SELECT * FROM Delivery_Person WHERE username=@username))
 SET @t=3
 End
 ELSE
+BEGIN
 SET @s='0'
 SET @t=-1 -- eshme3na 1 !?  :v :v 
+END
 INSERT INTO @tuple VALUES(@s,@t)
 RETURN
 END
@@ -44,6 +46,5 @@ CREATE PROC addAddress --c
 @address VARCHAR(100)
 AS
 BEGIN 
-INSERT INTO User_Address VALUES(@address,@username)
+INSERT INTO User_Addresses VALUES(@address,@username)
 END
-
