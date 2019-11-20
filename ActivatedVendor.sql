@@ -23,7 +23,7 @@ GO
 CREATE PROC vendorviewProducts  --OUTPUT IS RECORDs
 @vendorname VARCHAR(20)
 AS
-SELECT * 
+SELECT p.* 
 FROM Vendor v INNER JOIN Product p
 ON v.username = p.vendor_username
 WHERE v.username = @vendorname
@@ -44,13 +44,13 @@ AS
 BEGIN
 UPDATE Product
 SET vendor_username =@vendorname ,
---serial_number =  @serialnumber,    --- maynf3sh y update l primary key asl keda han3rf l product l han3mlo edit ezay
+--serial_no =  @serialnumber,    --- maynf3sh y update l primary key asl keda han3rf l product l han3mlo edit ezay
 product_name = @product_name,
 category = @category , 
 product_description = @product_description , 
 final_price = @price,
 color = @color
-WHERE serial_number = @serialnumber    -- hay update el product el nafs l serialnumber input??
+WHERE serial_no = @serialnumber    -- hay update el product el nafs l serialnumber input??
 END
 
 
@@ -62,7 +62,7 @@ CREATE PROC deleteProduct
 @serialnumber int
 AS
 DELETE FROM Product
-WHERE serial_number = @serialnumber AND vendor_username = @vendorname
+WHERE serial_no = @serialnumber AND vendor_username = @vendorname
 
 
 -- e)
@@ -72,11 +72,11 @@ CREATE PROC viewQuestions
 @vendorname VARCHAR(20)
 AS
 BEGIN
-SELECT c.question
+SELECT c.*
 FROM Vendor v INNER JOIN Product p
 ON v.username = p.vendor_username
 INNER JOIN Customer_Question_Product c
-ON c.serial_no = p.serial_number
+ON c.serial_no = p.serial_no
 WHERE v.username =@vendorname
 END
 
@@ -92,8 +92,8 @@ AS
 UPDATE Customer_Question_Product 
 SET answer = @answer
 FROM Product p INNER JOIN Customer_Question_Product c
-ON c.serial_no = p.serial_number 
-WHERE p.vendor_username = @vendorname AND p.serial_number = @serialno AND c.customer_name = @customername
+ON c.serial_no = p.serial_no 
+WHERE p.vendor_username = @vendorname AND p.serial_no = @serialno AND c.customer_name = @customername
 
 
 -- g) w akhawatha
@@ -140,6 +140,17 @@ DECLARE @todaysDate DATETIME
 SELECT @todaysDate = GETDATE()
 IF @todaysDate > @expDate
 BEGIN
+DECLARE @finalprice DECIMAL(10,2)
+DECLARE @offer INT
+DECLARE @serial INT
+SELECT @finalprice = final_price , @offer = offer_amount , @serial = p.serial_no
+FROM offer o INNER JOIN offersOnProduct op
+ON o.offer_id = op.offer_id
+INNER JOIN Product p
+ON p.serial_no = op.serial_no
+UPDATE Product
+SET final_price = @finalprice+@offer
+WHERE serial_no = @serial
 DELETE FROM offer
 WHERE offer_id = @offerid
 END
@@ -151,47 +162,27 @@ CREATE PROC applyOffer
 @offerid INT,
 @serial INT
 AS
+IF(@offerid NOT IN (SELECT offer_id FROM offersOnProduct))
+BEGIN
 DECLARE @price DECIMAL(10,2)
 DECLARE @offerAmount INT
-SELECT @price = final_price , @offerAmount = offer_amount
-FROM  Product p INNER JOIN offersOnProduct o
-ON p.serial_number = o.serial_no
-INNER JOIN offer oo
-ON oo.offer_id = o.offer_id
-WHERE p.vendor_username = @vendorname AND o.offer_id = @offerid           ---- MSH HANDLE HWAR ONE AT A TIME DA
+SELECT @offerAmount = offer_amount
+FROM offer
+WHERE offer_id = @offerid
 
-DECLARE @newPrice INT
+SELECT @price = price 
+FROM Product
+WHERE serial_no = @serial
+
+DECLARE @newPrice DECIMAL(10,2)
 SET @newPrice = @price - @offerAmount
 
 UPDATE Product
 SET final_price = @newPrice
-WHERE serial_number=@serial
+WHERE serial_no=@serial
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+INSERT INTO offersOnProduct 
+VALUES (@offerid,@serial)
+END
 
 
