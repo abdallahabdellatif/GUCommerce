@@ -1,31 +1,29 @@
-﻿---PROCEDURES AND FUNCTIONS
---CHECKO 3ALEHOM B DAMEER BLEEEZ
----REGISTRATION
-
---EXISTING USER
---GO
-
---AS A CUSTOMER
-GO
-CREATE FUNCTION	showProducts() ---a , mksl akmlha ama at2kd en elapproach sah
-RETURNS @records TABLE(
-serial_no INT,
-product_name VARCHAR(20),
-category VARCHAR(20),
-product_description text,
-final_price DECIMAL(10,2),
-color VARCHAR (20),
-available BIT ,
-rate INT,
-vendor_username VARCHAR(20)
-)
+﻿CREATE PROC showProducts --a
 AS
-BEGIN 
-RETURN -- DOES THIS WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOORK ?????
-END--work work work adididada work work work work
---b,c zy (a) okhtohom ely fo2 el line da bzbt
---CREATE FUNCTION ShowProductsbyPrice       --b
---CREATE FUNCTION searchbyname @text VARCHAR(20)          --c
+BEGIN
+	SELECT product_name,product_description,price,final_price,color
+		FROM Product
+END
+
+GO
+CREATE PROC ShowProductsbyPrice --b
+AS
+BEGIN
+	SELECT product_name,product_description,price,color
+		FROM Product
+		ORDER BY price		-- Check
+END
+
+GO
+CREATE PROC searchbyname --c
+@text varchar(20)
+AS
+BEGIN
+	SELECT product_name,product_description,price,final_price,color
+		FROM Product 
+		WHERE product_name LIKE @text+'%' OR product_name LIKE '%'+@text OR product_name LIKE '%'+@text+'%'
+END
+
 
 GO
 CREATE PROC AddQuestion --d
@@ -34,8 +32,14 @@ CREATE PROC AddQuestion --d
 @Question VARCHAR(50) --product customer question
 AS
 BEGIN
-INSERT INTO Customer_Question_Product(serial_no,customer_name,question) 
-VALUES(@serial,@customer,@Question)
+	IF(NOT EXISTS (SELECT * from Customer_Question_Product WHERE serial_no=@serial AND customer_name=@customer))
+		BEGIN
+			INSERT INTO Customer_Question_Product(serial_no,customer_name,question) 
+				VALUES(@serial,@customer,@Question)
+		END
+	SELECT * 
+		FROM Customer_Question_Product 
+		WHERE serial_no=@serial AND customer_name=@customer
 END
 
 GO
@@ -44,7 +48,11 @@ CREATE PROC addToCart --e1
 @serial INT
 AS 
 BEGIN
-INSERT INTO CustomerAddstoCartProduct VALUES (@serial,@customername)
+IF(NOT EXISTS(SELECT * FROM CustomerAddstoCartProduct WHERE customer_name=@customername AND serial_no=@serial))
+	BEGIN
+		INSERT INTO CustomerAddstoCartProduct VALUES (@serial,@customername)
+	END
+SELECT * FROM CustomerAddstoCartProduct WHERE customer_name=@customername 
 END
 
 GO
@@ -53,7 +61,14 @@ CREATE PROC removefromCart --e2
 @serial INT
 AS 
 BEGIN
-DELETE FROM CustomerAddstoCartProduct WHERE customer_name=@customername AND serial_no=@serial
+	if(EXISTS(SELECT * FROM CustomerAddstoCartProduct WHERE customer_name=@customername AND serial_no=@serial))
+		BEGIN
+			DELETE FROM CustomerAddstoCartProduct 
+				WHERE customer_name=@customername AND serial_no=@serial
+		END
+	SELECT * 
+		FROM CustomerAddstoCartProduct
+		WHERE customer_name=@customername 
 END
 
 GO
@@ -62,7 +77,12 @@ CREATE PROC createWishlist --f
 @name VARCHAR(20)
 AS
 BEGIN 
-INSERT INTO Wishlist VALUES(@customername,@name)
+	IF(NOT EXISTS (SELECT * FROM Wishlist WHERE username=@customername AND name=@name))
+		BEGIN
+			INSERT INTO Wishlist 
+				VALUES (@customername,@name)
+		END
+	SELECT * FROM Wishlist WHERE username=@customername 
 END
 
 GO
@@ -72,7 +92,12 @@ CREATE PROC AddtoWishlist --g1
 @serial INT
 AS
 BEGIN 
-INSERT INTO Wishlist_Product VALUES (@customername,@wishlistname,@serial)
+	IF (NOT EXISTS (SELECT * FROM Wishlist_Product WHERE username=@customername AND wish_name=@wishlistname and serial_no=@serial))
+		BEGIN
+			INSERT INTO Wishlist_Product 
+				VALUES (@customername,@wishlistname,@serial)
+		END
+	SELECT * FROM Wishlist_Product WHERE username=@customername AND wish_name=@wishlistname 
 END
 
 GO
@@ -82,79 +107,24 @@ CREATE PROC removefromWishlist --g2
 @serial int
 AS
 BEGIN 
-DELETE FROM Wishlist_Product 
-WHERE wish_name=@wishlistname AND username=@customername AND serial_no=@serial
+	IF (EXISTS(SELECT * FROM Wishlist_Product WHERE username=@customername AND wish_name=@wishlistname and serial_no=@serial))
+		BEGIN
+			DELETE FROM Wishlist_Product 
+			WHERE wish_name=@wishlistname AND username=@customername AND serial_no=@serial
+		END
+	SELECT * FROM Wishlist_Product WHERE username=@customername AND wish_name=@wishlistname
 END
 
---h,i zy a,b,c naaw
--- CREATE FUNCTION showWishlistProduct    --h
--- CREATE FUNCTION viewMyCart           --I
-
-GO
-CREATE FUNCTION calculatepriceOrder(@customername varchar(20)) --j1 , customer is name or username? username
-RETURNS DECIMAL(10,2)
-AS
-BEGIN 
-DECLARE @sum DECIMAL (10,2)
-SELECT @sum=SUM(P.price)
-FROM CustomerAddstoCartProduct ac INNER JOIN Product P ON P.serial_no=ac.serial_no
-WHERE ac.customer_name=@cutomername
-RETURN @sum
-END
-
-GO
-CREATE PROC emptyCart --j2
-@customername varchar(20)
-AS
-BEGIN
-DELETE FROM CustomerAddstoCartProduct 
-WHERE customer_name=@customername
-END
-
-GO
---CREATE PROC makeOrder --j3 dunno msh ader
-
---j4 bardo zy a,b,c,h,j
---start with k from this and the other remaining shit
---m3 agmal tahyaty ,shokran
---zerbew elnwwwwwww
-
---khaled starts here...
-CREATE PROC showProducts --a
-AS
-BEGIN
-SELECT *
-FROM Product
-END
-
-GO
-CREATE PROC ShowProductsbyPrice --b
-AS
-BEGIN
-SELECT *
-FROM Product
-ORDER BY final_price		-- Check
-END
-
-GO
-CREATE PROC searchbyname --c
-@text varchar(20)
-AS
-BEGIN
-SELECT *
-FROM Product 
-WHERE product_name=@text	--Check ; maybe sth not as restrict as = ?
-END
 
 GO
 CREATE PROC showWishlistProduct --h
 @customername varchar(20), @name varchar(20)
 AS 
 BEGIN
-SELECT P.*  --W malhash lazma mesh keda?
-FROM  Wishlist_Product WP 
-INNER JOIN Product P ON P.serial_no=WP.serial_no
-WHERE WP.username=@customername AND WP.name=@name
+	SELECT p.product_name,p.product_description,p.price,p.final_price,p.color
+		FROM  Wishlist_Product WP
+		INNER JOIN Product p ON p.serial_no=WP.serial_no
+		WHERE WP.username=@customername AND WP.wish_name=@name
 END
 
 GO
@@ -162,38 +132,46 @@ CREATE PROC  viewMyCart --i
 @customer varchar(20)
 AS 
 BEGIN
-SELECT p.*
-FROM CustomerAddstoCartProduct c INNER JOIN Product p ON c.serial_no=p.serial_number
-WHERE c.customer_name=@customer
+	SELECT p.product_name,p.product_description,p.price,p.final_price,p.color
+		FROM CustomerAddstoCartProduct c INNER JOIN Product p ON c.serial_no=p.serial_no
+		WHERE c.customer_name=@customer
 END
 
+
 GO
-CREATE PROC makeOrder --j3  انها حقا لعينة يا جورج
-@customername varchar(20)
+CREATE FUNCTION calculatepriceOrder(@customername varchar(20)) --j1
+RETURNS DECIMAL(10,2)
 AS
-BEGIN
-DECLARE @amo DECIMAL(10,2)
-SET @amo=dbo.calculatepriceOrder (@customername)
-
-INSERT INTO Orders(customer_name,total_amount, order_date)
-VALUES(@customername,@amo, CURRENT_TIMESTAMP)
-
---ana kont 3amel el goz2 el commented dah 3alshan makanosh aylin en a7na han update product fy productin order
-
---DECLARE @orderNO INT
---SELECT @orderNO=MAX(order_no)
---FROM Orders
-
---UPDATE Product
---SET customer_order_id=@orderNO
---FROM Product p INNER JOIN CustomerAddstoCartProduct c ON p.serial_number=c.c.serial_no
---WHERE c.customer_name=@customername
-
-EXEC emptyCart @customername
+BEGIN 
+	DECLARE @sum DECIMAL (10,2)
+	--SELECT @sum=SUM(P.price)
+	SELECT @sum=SUM(P.final_price)
+		FROM CustomerAddstoCartProduct ac INNER JOIN Product P ON P.serial_no=ac.serial_no
+		WHERE ac.customer_name=@cutomername
+	RETURN @sum
 END
 
 GO
-CREATE PROC productsinorder --j4
+CREATE PROC productsinorder --j2
+@customername varchar(20), @orderID int
+AS 
+BEGIN
+	UPDATE PRODUCT
+		SET customer_username=@customername, customer_order_id=@orderID
+		WHERE serial_no IN (	SELECT serial_no
+								FROM CustomerAddstoCartProduct
+								WHERE customer_name=@customername
+							)
+	DELETE FROM CustomerAddstoCartProduct
+		WHERE	serial_no IN (	SELECT serial_no
+								FROM CustomerAddstoCartProduct
+								WHERE customer_name=@customername)
+				AND	customer_name <> @customername
+END
+
+/* 
+GO
+CREATE PROC productsinorder --j2
 @customername varchar(20), @orderID int
 AS 
 BEGIN
@@ -213,17 +191,86 @@ SELECT p.*
 FROM Product p INNER JOIN Orders o ON p.customer_order_id=o.order_no
 WHERE o.customer_name=@customername AND o.order_no=@orderID
 END
+*/
+
+
+GO
+CREATE PROC emptyCart --j3
+@customername varchar(20)
+AS
+BEGIN
+DELETE FROM CustomerAddstoCartProduct 
+WHERE customer_name=@customername
+END
+
+GO
+
+GO
+CREATE PROC makeOrder --j4  انها حقا لعينة يا جورج
+@customername varchar(20)
+AS
+BEGIN
+	DECLARE @amo DECIMAL(10,2)
+	SET @amo=dbo.calculatepriceOrder (@customername)
+	INSERT INTO Orders(customer_name,total_amount, order_date, order_status)
+		VALUES(@customername,@amo, CURRENT_TIMESTAMP) -- ,'not processed')
+
+	DECLARE @orderNO INT
+	SELECT @orderNO=MAX(order_no)
+		FROM Orders
+	EXEC productsinorder @customername, @orderNO
+	
+	EXEC emptyCart @customername
+END
+
+
+
 
 GO
 CREATE PROC cancelOrder --k
 @orderid int
 AS
 BEGIN
-IF order_status ='not processed' or order_status='in process'
-DELETE FROM Orders
-WHERE order_no=@orderid
-ELSE
-PRINT 'no can dosville baby doll'
+	IF order_status ='not processed' or order_status='in process'
+		BEGIN
+			IF (EXISTS (SELECT O.Gift_Card_code_used 
+			FROM Orders O Inner JOIN Giftcard G ON G.code=O.Gift_Card_code_used
+			WHERE O.order_no=@orderid AND G.expiry_date>CURRENT_TIMESTAMP) )
+			BEGIN
+				DECLARE @points_amount INT
+				SET @points_amount = (SELECT @total_amount - (cash_amount+credit_amount) 
+											FROM Orders
+											WHERE order_no=@orderid
+											)
+				DECLARE @username VARCHAR(20)
+				SET @username = (SELECT customer_name
+										FROM Orders
+										WHERE order_no=@orderid)
+				UPDATE Customer
+					SET points = points + @points_amount
+					WHERE username = @username
+				DECLARE @code INT
+				SET @code = (SELECT Gift_Card_code_used FROM Orders WHERE order_no=@orderid)
+				UPDATE Admin_Customer_Giftcard
+					SET remaining_points = remaining_points+@points_amount
+					WHERE code=@code AND customer_name=@username
+			END
+		ELSE IF ((SELECT Gift_Card_code_used 
+					FROM Orders 
+					WHERE O.order_no=@orderid )IS NOT NULL ) 
+			BEGIN
+				EXEC removeExpiredGiftCard (SELECT Gift_Card_code_used FROM Orders WHERE O.order_no=@orderid)
+			END
+		UPDATE Product
+			SET customer_order_id=null,customer_username=null
+			WHERE customer_order_id=@orderid
+		DELETE FROM Orders
+			WHERE order_no=@orderid
+		END
+		ELSE
+			BEGIN
+				PRINT 'no can dosville baby doll'
+			END
 END
 
 GO
@@ -258,21 +305,39 @@ WHERE customer_username=@customername AND serial_number=@serialno
 END
 
 GO
-CREATE PROC SpecifyAmount --o ana habed be nesbet 60%
+CREATE PROC SpecifyAmount --o
 @customername varchar(20), @orderID int, @cash decimal(10,2), @credit decimal(10,2)
 AS
 BEGIN 
-IF @cash + @credit <total_amount
-UPDATE Orders
-SET cash_amount=@cash  ,credit_amount=@credit ,payement_type='partially'
-WHERE customer_name=@customername AND order_no=@orderID
-ELSE
-UPDATE Orders
-SET cash_amount=@cash  ,credit_amount=@credit ,payement_type='totally'
-WHERE customer_name=@customername AND order_no=@orderID
+	DECLARE @order_amount DECIMAL (100,2)
+	SET @order_amount = (SELECT max(total_amount) FROM Orders WHERE order_no=@orderID)
+	IF @cash >0
+		BEGIN
+		UPDATE Orders
+				SET cash_amount=@cash, payement_type='cash'
+				WHERE customer_name=@customername AND order_no=@orderID
+		IF (@cash < @order_amount)
+			BEGIN
+				IF ((SELECT MAX(points) FROM Customer WHERE username=@customername) >= @order_amount  )
+					BEGIN
+						DECLARE @code INT
+						
+						--SET @code =	
+--NEED TO SET @code here to be = code of giftcard assigned to this customer such that it its remaining_points>remaining amount to complete the order AND it's the minimum amount among amounts of giftcards assigned to this customer that satisfy the previous condition
+--ex : if customer x needs 70 points to complete order ; he has 300 points; from g1=50 points; g2=80 points;g3=110 points; g4=60 points ;
+--then we pickup g2 = 80 points as it is THE MINIMUM AMOUNT SUFFICENT TO COMPLETE THE ORDER
+						UPDATE Admin_Customer_Giftcard
+							SET remaining_points = remaining_points - (@order_amount-@cash) 
+							WHERE customer_name=@customername AND code=@code
+					END
+			END
+		END
 
-UPDATE Customer
-SET points=points+@credit --mesh 3aref ba2a 
+	ELSE IF @credit>0
+		--BEGIN
+		--Will copy the code of Cash here ; change every cash->credit ; 
+		--after completeing the part OF SET @code
+		--END
 END
 
 GO
@@ -283,75 +348,74 @@ CREATE PROC AddCreditCard --new p
 @customername varchar(20)
 AS
 BEGIN
-INSERT INTO Credit_Card
-VALUES (@creditcardnumber, @expirydate, @cvv);
-INSERT INTO Customer_CreditCard
-VALUES (@customername, @creditcardnumber);
+	INSERT INTO Credit_Card
+	VALUES (@creditcardnumber, @expirydate, @cvv);
+	INSERT INTO Customer_CreditCard
+	VALUES (@customername, @creditcardnumber);
 END
 
 GO
-CREATE PROC ChooseCreditCard --p
+CREATE PROC ChooseCreditCard --q
 @creditcard varchar(20), @orderid int
 AS
 BEGIN
-UPDATE Orders
-SET creditCard_number=@creditcard
-WHERE order_no=@orderid
+	UPDATE Orders
+		SET creditCard_number=@creditcard
+		WHERE order_no=@orderid
 END
 
 GO
-CREATE PROC vewDeliveryTypes --q
+CREATE PROC vewDeliveryTypes --r
 AS 
 BEGIN
-SELECT delivery_type --aw fees we duration ma3rafsh
+SELECT delivery_type as 'TYPE', time_duration as 'Duration in Days',fees 
 FROM Delivery
 END
 
 GO
-CREATE PROC specifydeliverytype --r
+CREATE PROC specifydeliverytype --s
 @orderID int, @deliveryID INT
 AS
 BEGIN
-DECLARE @DAYS int
-SELECT @DAYS = time_duration
-FROM Delivery
-WHERE id = @deliveryID
+	DECLARE @dur int
+	SELECT @dur = time_duration
+		FROM Delivery
+		WHERE id = @deliveryID
 
-UPDATE Orders
-SET delivery_id=@deliveryID
-WHERE order_no=@orderID
-
-UPDATE Orders 
-SET remaining_days =  @DAYS  - DAY (CURRENT_TIMESTAMP - order_date )
+	UPDATE Orders
+		SET delivery_id=@deliveryID,
+			remaining_days =  @dur  - DATEDIFF (CURRENT_TIMESTAMP - order_date )
+		WHERE order_no=@orderID
 END
 
 GO
-CREATE PROC trackRemainingDays --s
+CREATE PROC trackRemainingDays --t
 @orderid int, @customername varchar(20), --el input customername malosh lazma
 @days INT OUTPUT                      --fa homa 7atino leh
 AS                                     --fa 8aleban ely ana 3amlo 8alat
 BEGIN
-DECLARE @RDAYS int
-DECLARE @Did INT
+	DECLARE @dur int
+	DECLARE @Did INT
 
-SELECT @Did = delivery_id
-FROM Orders
-WHERE order_no= @orderid
+	SELECT @Did = delivery_id
+		FROM Orders
+		WHERE order_no= @orderid
 
-SELECT @RDAYS = time_duration
-FROM Delivery
-WHERE id = @Did
+	SELECT @dur = time_duration
+		FROM Delivery
+		WHERE id = @Did
 
-UPDATE Orders 
-SET remaining_days =  @RDAYS  - DAY (CURRENT_TIMESTAMP - order_date )
+	UPDATE Orders 
+		SET remaining_days =  @dur  - DATEDIFF (CURRENT_TIMESTAMP - order_date )
+		WHERE order_no=@orderid AND customer_name=@customername
 
-SELECT @days=remaining_days
-FROM Orders
-WHERE order_no=@orderid AND customer_name=@customername
+	SELECT @days=remaining_days		-- can't we do this in the previous statement ?
+		FROM Orders
+		WHERE order_no=@orderid AND customer_name=@customername
 END
 
 GO
-CREATE PROC recommmend --t
+CREATE PROC recommmend --u
 @customername varchar(20)-- mesh ader akamel 
 AS                         --انتظرونا في حلقة قادمة مع برنامج شبراوي للهبد
 BEGIN
