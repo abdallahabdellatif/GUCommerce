@@ -1,3 +1,4 @@
+
 CREATE TABLE Users(
 username VARCHAR(20), 
 password VARCHAR(20),
@@ -327,27 +328,22 @@ FOREIGN KEY (creditCard_number) REFERENCES Credit_Card ON DELETE NO ACTION ON UP
 	-- I THINK THE LAST SHOULD BE NO ACTION ???
 );
 
-
 CREATE TABLE Product(
 serial_no INT IDENTITY,
 product_name VARCHAR(20),
 category VARCHAR(20),
 product_description text,
--- in eerd they have 2 att. price and final_price ; but in schema only final_price
+price DECIMAL (10,2),
 final_price DECIMAL(10,2),	--On (a) and (c) in page 5
 color VARCHAR (20), 		--on (a) page 5
 available BIT , -- didn't mention type
 rate INT, -- (n) in page +4+
--- إلى عرووووسي
--- 2asdi en l m3loma di gaya mn p4 fe MS_II.pdf fe l point rakam (n)
 vendor_username VARCHAR(20), 
 customer_username VARCHAR(20), 
 customer_order_id INT,
 PRIMARY KEY(serial_no),
 FOREIGN KEY(vendor_username) REFERENCES Vendor, --ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (customer_username) REFERENCES Customer, -- ON DELETE CASCADE ON UPDATE CASCADE, 
--- fl schema msh m3mola dashed line enaha foreign key ezay ????!
--- YOU ARE RIGHT AROSI <3 
 FOREIGN KEY(customer_order_id) REFERENCES Orders ON DELETE CASCADE ON UPDATE CASCADE
 );
 
