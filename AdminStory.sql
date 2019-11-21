@@ -1,5 +1,5 @@
 ﻿--ADMIN STORY
-
+GO
 CREATE PROC activateVendors --a
 @admin_username varchar(20),
 @vendor_username varchar(20)
@@ -165,19 +165,49 @@ BEGIN
 	DELETE FROM Giftcard
 		WHERE CURRENT_TIMESTAMP >expiry_date AND @code =code
 END
+
 --i2
+
+
+
+
+
+/*GO 
+CREATE PROC removeExpiredGiftCard 
+@code VARCHAR(10)
+AS
+DECLARE @todaysDate DATETIME
+SELECT @todaysDate = GETDATE()
+UPDATE Customer
+SET points = points - (SELECT a.remaining_points
+FROM Admin_Customer_Giftcard a
+WHERE a.code = @code AND a.customer_name = username)
+WHERE username  IN (
+SELECT c.username , acg.remaining_points
+FROM Customer c INNER JOIN Admin_Customer_Giftcard acg
+ON c.username = acg.customer_name
+INNER JOIN Giftcard gc 
+ON gc.code = acg.code
+WHERE gc.code = @code AND @todaysDate >=gc.expiry_date)
+DELETE FROM Admin_Customer_Giftcard
+WHERE code = @code
+DELETE FROM Giftcard
+WHERE code=@code AND @todaysDate >= expiry_date
+*/
 
 GO --ana mesh fahem howa 3ayez eh fa hal haza sa7i7
 CREATE PROC checkGiftCardOnCustomer
 @code VARCHAR(10),
 @activeGiftCard BIT OUTPUT
 AS
-BEGIN
-	IF(EXISTS(SELECT customer_name FROM Admin_Customer_Giftcard WHERE code=@code))
-		SET @activeGiftCard='1'
-	ELSE
-		SET @activeGiftCard='0'
-END
+
+IF(EXISTS(SELECT customer_name FROM Admin_Customer_Giftcard WHERE code=@code))
+SET @activeGiftCard='1'
+ELSE
+SET @activeGiftCard='0'
+
+
+
 
 GO
 CREATE PROC giveGiftCardtoCustomer --i3
@@ -185,28 +215,15 @@ CREATE PROC giveGiftCardtoCustomer --i3
 @customer_name VARCHAR(20),
 @admin_username VARCHAR(20)
 AS
-BEGIN
-	DECLARE @cardAmount INT;
-	SELECT @cardAmount = amount
-		FROM Giftcard 
-		WHERE code=@code;
+DECLARE @points INT 
+SELECT @points = gc.amount
+FROM Admins a INNER JOIN Giftcard gc
+ON a.username = gc.username
+WHERE a.username = @admin_username AND gc.code = @code
 
-	IF(@admin_username IN(SELECT username FROM Admins) AND
-	@customer_name IN (SELECT username FROM Customer) AND
-	@code NOT IN(SELECT code FROM Admin_Customer_Giftcard) AND
-	@code IN(SELECT code FROM Giftcard))
-	BEGIN
-		INSERT INTO Admin_Customer_Giftcard
-			VALUES(@code,@customer_name,@admin_username,@cardAmount);
+UPDATE Customer
+SET points = points + @points
+WHERE  username = @customer_name   
 
-		DECLARE @oldpoints INT
-		SELECT @oldpoints=points
-			FROM Customer
-			WHERE username=@customer_name
-
-		UPDATE Customer --mesh sha8al
-			SET points=@oldpoints+@cardAmount
-			WHERE username=@customer_name
-	END
-END
-
+INSERT INTO Admin_Customer_Giftcard
+VALUES(@code,@customer_name,@admin_username,@points);

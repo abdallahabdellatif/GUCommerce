@@ -128,7 +128,7 @@ PRINT (@activeoffer)
 END
 
 
-GO
+/*GO
 CREATE PROC checkandremoveExpiredoffer
 @offerid int
 AS
@@ -154,6 +154,31 @@ WHERE serial_no = @serial
 DELETE FROM offer
 WHERE offer_id = @offerid
 END
+*/
+
+
+GO
+CREATE PROC checkandremoveExpiredoffer
+@offerid int
+AS
+DECLARE @todaysDate DATETIME
+SELECT @todaysDate = GETDATE()
+UPDATE Product
+SET final_price = price
+WHERE serial_no IN
+(SELECT oo.serial_no
+FROM offer o INNER JOIN offersOnProduct oo
+ON o.offer_id = oo.offer_id
+WHERE oo.offer_id = @offerid AND @todaysDate >= o.expiry_date)
+DELETE 
+FROM offersOnProduct
+WHERE offer_id IN 
+( SELECT offer_id 
+FROM offer
+WHERE offer_id=@offerid AND @todaysDate>= expiry_date)
+DELETE 
+FROM offer
+WHERE @todaysDate>expiry_date AND offer_id=@offerid
 
 
 GO

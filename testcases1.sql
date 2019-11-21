@@ -17,6 +17,8 @@ EXEC reviewOrders
 --table order
 SELEcT * FROM Orders
 
+SELECT * FROM Customer
+
 --d
 EXEC updateOrderStatusInProcess 1 -- 1 da ana ely 7ato howa al whatever order number you created
 
@@ -59,14 +61,15 @@ SELECT * FROM Giftcard
 EXEC createGiftCard 'G105' , '2019/11/3' ,100 , 'hana.aly'
 
 --i1
-EXEC giveGiftCardtoCustomer 'G104' , 'ammar.yasser' , 'hana.aly'
+EXEC giveGiftCardtoCustomer 'G105' , 'ammar.yasser' , 'hana.aly'
+EXEC giveGiftCardtoCustomer 'G105' , 'ahmed.ashraf' , 'hana.aly'
 --table admin customer giftcards
 SELECT * FROM Admin_Customer_Giftcard 
 --table customer(points)
 SELECT c.username, c.points FROM Customer c
 
 --i1 bardo
-EXEC giveGiftCardtoCustomer 'G102' , 'ahmed.ashraf' , 'hana.aly'
+EXEC giveGiftCardtoCustomer 'G101' ,'ahmed.ashraf','hana.aly'
 
 --i2
 EXEC removeExpiredGiftCard 'G105'
@@ -82,3 +85,16 @@ DECLARE @bit BIT
 EXEC checkGiftCardOnCustomer 'G101',@bit OUTPUT
 PRINT @bit
 --again for input 'G1012' mafrod yetla3 0
+
+
+select * from Customer
+
+select * from Admins
+
+select * from Giftcard
+
+select * from Admin_Customer_Giftcard
+
+
+
+

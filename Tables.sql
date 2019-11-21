@@ -193,10 +193,10 @@ IF UPDATE(username)
 			FROM Orders,inserted,deleted
 			WHERE deleted.username=Orders.customer_name
 		UPDATE Product 
-			SET customer_name = inserted.username
+			SET customer_username = inserted.username
 			FROM Product,inserted,deleted
-			WHERE deleted.username=Product.customer_name
-		UPDATE CustomerAddstoCartProduct 
+			WHERE deleted.username = Product.customer_username
+		UPDATE CustomerAddstoCartProduct
 			SET customer_name = inserted.username
 			FROM CustomerAddstoCartProduct ,inserted,deleted
 			WHERE deleted.username=CustomerAddstoCartProduct.customer_name
@@ -207,7 +207,7 @@ IF UPDATE(username)
 		UPDATE Wishlist 
 			SET username = inserted.username
 			FROM Wishlist,inserted,deleted
-			WHERE deleted.username=Wishlist.customer_name		
+			WHERE deleted.username = Wishlist.username	
 		UPDATE Admin_Customer_Giftcard 
 			SET customer_name = inserted.username
 			FROM Admin_Customer_Giftcard, inserted,deleted
@@ -218,7 +218,6 @@ IF UPDATE(username)
 			WHERE deleted.username=Customer_CreditCard.customer_name
 	END
 END
-
 
 GO
 CREATE TRIGGER Vendor_delete

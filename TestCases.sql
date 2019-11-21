@@ -94,20 +94,20 @@ DELETE FROM Product where product_name = 'pencil'
 
 EXEC vendorviewProducts 'eslam.mahmod'
 
-EXEC EditProduct  'eslam.mahmod' , 7 ,'pencil','stationary', 'HB0.7',10.0 ,'blue'
+EXEC EditProduct  'eslam.mahmod' , 2 ,'pencil','stationary', 'HB0.7',10.0 ,'blue'
 
-EXEC deleteProduct 'eslam.mahmod' , 7
+EXEC deleteProduct 'eslam.mahmod' , 2
 
 EXEC viewQuestions 'hadeel.adel'
 
 EXEC answerQuestions 'hadeel.adel' , 1, 'ahmed.ashraf' , '40'
 
-EXEC addOffer  5, '11/10/2019'
+EXEC addOffer  2, '11/10/2019'
 
 select * from offersOnProduct
 select * from offer
 
-EXEC applyOffer 'hadeel.adel' , 1,4
+EXEC applyOffer 'hadeel.adel' , 1,2
 
 EXEC checkandremoveExpiredoﬀer 2
 
