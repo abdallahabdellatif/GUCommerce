@@ -1,9 +1,9 @@
 
 CREATE TABLE Users(
 username VARCHAR(20), 
-password VARCHAR(20),
 first_name VARCHAR(20), 
 last_name VARCHAR(20),  
+password VARCHAR(20),
 email VARCHAR(50),
 PRIMARY KEY (username),
 CONSTRAINT email_unique UNIQUE(email)
@@ -329,7 +329,7 @@ CREATE TABLE Product(
 serial_no INT IDENTITY,
 product_name VARCHAR(20),
 category VARCHAR(20),
-product_description text,
+product_description VARCHAR(200),--text,
 price DECIMAL (10,2),
 final_price DECIMAL(10,2),	--On (a) and (c) in page 5
 color VARCHAR (20), 		--on (a) page 5

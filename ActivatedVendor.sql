@@ -8,7 +8,7 @@ CREATE PROC postProduct
 @vendorUsername VARCHAR(20),
 @product_name VARCHAR(20),
 @category VARCHAR(20),
-@product_description TEXT,
+@product_description VARCHAR(200),--TEXT,
 @price DECIMAL(10,2),
 @color VARCHAR(20)
 AS
@@ -37,7 +37,7 @@ CREATE PROC EditProduct
 @serialnumber INT,
 @product_name VARCHAR(20),
 @category VARCHAR(20),
-@product_description TEXT,
+@product_description VARCHAR(200),--TEXT,
 @price DECIMAL(10,2),
 @color VARCHAR(20)
 AS
@@ -209,5 +209,3 @@ WHERE serial_no=@serial
 INSERT INTO offersOnProduct 
 VALUES (@offerid,@serial)
 END
-
-
