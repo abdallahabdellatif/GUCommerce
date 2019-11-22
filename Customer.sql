@@ -150,6 +150,7 @@ BEGIN
 	SELECT @result=SUM(P.final_price)
 		FROM CustomerAddstoCartProduct ac INNER JOIN Product P ON P.serial_no=ac.serial_no
 		WHERE ac.customer_name=@customername
+	print @result
 	--RETURN @sum
 END
 
@@ -204,6 +205,7 @@ BEGIN
 	SELECT * FROM Orders WHERE order_no=@orderNO
 END
 
+
 GO
 CREATE PROC cancelOrder --k
 @orderid int
@@ -218,20 +220,32 @@ BEGIN
 				WHERE order_status ='not processed' OR order_status='in process' 
 				AND order_no=@orderid)
 		BEGIN
+			DECLARE @GCU VARCHAR(10)
 			IF (EXISTS (SELECT O.Gift_Card_code_used 
 			FROM Orders O Inner JOIN Giftcard G ON G.code=O.Gift_Card_code_used
-			WHERE O.order_no=@orderid AND G.expiry_date>CURRENT_TIMESTAMP) )
+			WHERE O.order_no=@orderid AND G.expiry_date>CURRENT_TIMESTAMP AND O.Gift_Card_code_used IS NOT NULL ) )
 			BEGIN
 				DECLARE @points_amount INT
-				SET @points_amount = (SELECT total_amount - (cash_amount+credit_amount) 
-											FROM Orders
-											WHERE order_no=@orderid
-											)
+				declare @cash decimal(10,2) declare @credit decimal(10,2)
+				SELECT @cash=cash_amount FROM Orders WHERE order_no=@orderid
+				SELECT @credit=credit_amount FROM Orders WHERE order_no=@orderid
+				IF (@cash IS NOT NULL AND @cash>0)
+					begin
+						SELECT @points_amount= total_amount - cash_amount
+							FROM Orders
+							WHERE order_no=@orderid
+					end						
+				else if (@credit IS NOT NULL AND @credit>0)
+					begin
+						SELECT @points_amount= total_amount - credit_amount
+								FROM Orders
+								WHERE order_no=@orderid
+					end
 				
 				UPDATE Customer
 					SET points = points + @points_amount
 					WHERE username = @username
-				DECLARE @code INT
+				DECLARE @code VARCHAR(10)
 				SET @code = (SELECT Gift_Card_code_used FROM Orders WHERE order_no=@orderid)
 				UPDATE Admin_Customer_Giftcard
 					SET remaining_points = remaining_points+@points_amount
@@ -329,7 +343,7 @@ BEGIN
 				BEGIN
 					IF ((SELECT MAX(points) FROM Customer WHERE username=@customername) >= @order_amount  )
 						BEGIN
-							DECLARE @code1 INT
+							DECLARE @code1 VARCHAR(10)
 						
 							SET @code1 =	(
 								SELECT TOP 1 G.code
@@ -337,7 +351,9 @@ BEGIN
 									WHERE ACG.remaining_points >= @order_amount-@cash AND G.expiry_date>CURRENT_TIMESTAMP
 									ORDER BY G.expiry_date 
 									)
-
+							UPDATE Customer
+								SET points = points- (@order_amount-@cash) 
+								WHERE username=@customername
 							UPDATE Admin_Customer_Giftcard
 								SET remaining_points = remaining_points - (@order_amount-@cash) 
 								WHERE customer_name=@customername AND code=@code1
@@ -358,7 +374,7 @@ BEGIN
 				BEGIN
 					IF ((SELECT MAX(points) FROM Customer WHERE username=@customername) >= @order_amount  )
 						BEGIN
-							DECLARE @code2 INT
+							DECLARE @code2 VARCHAR(10)
 						
 							SET @code2 =	(
 								SELECT TOP 1 G.code
@@ -366,7 +382,9 @@ BEGIN
 									WHERE ACG.remaining_points >= @order_amount-@credit AND G.expiry_date>CURRENT_TIMESTAMP
 									ORDER BY G.expiry_date 
 									)
-
+							UPDATE Customer
+								SET points = points- (@order_amount-@credit) 
+								WHERE username=@customername
 							UPDATE Admin_Customer_Giftcard
 								SET remaining_points = remaining_points - (@order_amount-@credit) 
 								WHERE customer_name=@customername AND code=@code2

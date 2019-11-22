@@ -1,4 +1,5 @@
-﻿--users
+﻿
+--users
 INSERT INTO Users(username,first_name,last_name,password,email)
 VALUES('hana.aly','hana','aly','pass1','hana.aly@guc.edu.eg')
 INSERT INTO Users(username,first_name,last_name,password,email)
@@ -103,7 +104,7 @@ INSERT INTO Wishlist_Product
 VALUES('ammar.yasser','fashion',1)
 INSERT INTO Wishlist_Product
 VALUES('ammar.yasser','fashion',4)
-TRUNCATE TABLE Wishlist_Product;
+--TRUNCATE TABLE Wishlist_Product;
 
 -- Giftcard
 INSERT INTO Giftcard (code,expiry_date,amount)

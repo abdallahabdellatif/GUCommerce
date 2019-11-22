@@ -26,7 +26,7 @@ FOREIGN KEY(username) REFERENCES Users -- ON DELETE CASCADE ON UPDATE CASCADE
 
 CREATE TABLE Customer(
 username VARCHAR(20), 
-points INT ,
+points INT default 0 NOT NULL,
 -- should we add default value 0 for points ?
 PRIMARY KEY(username),
 FOREIGN KEY(username) REFERENCES Users --ON DELETE CASCADE ON UPDATE CASCADE

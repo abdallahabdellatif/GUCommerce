@@ -1,4 +1,5 @@
-﻿--ADMIN STORY
+﻿
+--ADMIN STORY
 GO
 CREATE PROC activateVendors --a
 @admin_username varchar(20),
@@ -215,15 +216,24 @@ CREATE PROC giveGiftCardtoCustomer --i3
 @customer_name VARCHAR(20),
 @admin_username VARCHAR(20)
 AS
-DECLARE @points INT 
-SELECT @points = gc.amount
-FROM Admins a INNER JOIN Giftcard gc
-ON a.username = gc.username
-WHERE a.username = @admin_username AND gc.code = @code
+BEGIN
+	DECLARE @points INT 
+	SELECT @points = amount
+		FROM Giftcard 
+		WHERE code = @code
 
-UPDATE Customer
-SET points = points + @points
-WHERE  username = @customer_name   
+	INSERT INTO Admin_Customer_Giftcard
+		VALUES(@code,@customer_name,@admin_username,@points);
 
-INSERT INTO Admin_Customer_Giftcard
-VALUES(@code,@customer_name,@admin_username,@points);
+	DECLARE @oldpoints INT
+	SELECT @oldpoints =points
+		FROM Customer
+		WHERE username=@customer_name
+
+
+	UPDATE Customer
+	SET points = @oldpoints + @points
+	WHERE  username = @customer_name   
+
+END
+--drop proc giveGiftCardtoCustomer

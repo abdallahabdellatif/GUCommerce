@@ -1,4 +1,5 @@
-﻿--a
+﻿
+--a
 CREATE PROC acceptAdminInvitation
 @delivery_username VARCHAR(20)
 AS

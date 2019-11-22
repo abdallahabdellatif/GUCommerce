@@ -1,4 +1,5 @@
-﻿CREATE PROC customerRegister --a ,hn hande zy elnetworks wla fakes?
+﻿
+CREATE PROC customerRegister --a ,hn hande zy elnetworks wla fakes?
 @username VARCHAR(20),
 @first_name VARCHAR(20), 
 @last_name VARCHAR(20),
