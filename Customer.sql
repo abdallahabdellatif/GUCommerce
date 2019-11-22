@@ -415,109 +415,37 @@ BEGIN
 END
 
 GO
-CREATE PROC recommmend --u
-@customername varchar(20)-- mesh ader akamel 
-AS                         --انتظرونا في حلقة قادمة مع برنامج شبراوي للهبد
+create procedure recommend
+@customername varchar(20)
+AS
 BEGIN
-DECLARE @maxca1 VARCHAR(20)
-DECLARE @maxca2 VARCHAR(20)
-DECLARE @maxca3 VARCHAR(20)
 
-(SELECT @maxca1=p.category
-FROM CustomerAddstoCartProduct cap INNER JOIN Product p ON cap.serial_no=p.serial_number
-WHERE cap.customer_name=@customername
-GROUP BY p.category
-HAVING COUNT(*)=(
-SELECT MAX(count1)
-FROM(SELECT DISTINCT COUNT(*) AS 'count1'
-FROM CustomerAddstoCartProduct cap INNER JOIN Product p ON cap.serial_no=p.serial_number
-WHERE cap.customer_name=@customername
-GROUP BY p.category)AS Temp1))
+DECLARE @Product2serials TABLE(
+serial int,num int);
 
-(SELECT @maxca2=p.category
-FROM CustomerAddstoCartProduct cap INNER JOIN Product p ON cap.serial_no=p.serial_number
-WHERE cap.customer_name=@customername
-GROUP BY p.category
-HAVING COUNT(*)=(
-SELECT MAX(count2)
-FROM(SELECT DISTINCT COUNT(*) AS 'count2'
-FROM CustomerAddstoCartProduct cap INNER JOIN Product p ON cap.serial_no=p.serial_number
-WHERE cap.customer_name=@customername AND p.category<>@maxca1
-GROUP BY p.category)AS Temp2))
+INSERT INTO @Product2serials(serial,num)
+select top 3 p.serial_no,count(p.serial_no)
+from Product p inner join Wishlist_product wp on p.serial_no=wp.serial_no
+where p.category in (SELECT top 3 p.category
+FROM Product p2 INNER JOIN CustomerAddstoCartProduct adc ON adc.seriaL_no=p2.serial_no
+where adc.customer_name=@customername
+group by p2.category
+order by count(p2.category) desc)
+group by p.serial_no
+UNION
+select top 3 p.serial_no,count(p.serial_no)
+from Product p inner join Wishlist_Product wp on p.serial_no=wp.serial_no
+where wp.username in(select top 3 cpp.customer_name 
+  from CustomerAddstoCartProduct cpp
+  where cpp.customer_name<>@customername and cpp.serial_no in(select cp.serial_no
+  from CustomerAddstoCartProduct cp
+  where cp.customer_name=@customername) 
+  group by cpp.customer_name
+  order by count(cpp.customer_name) desc)
+  group by p.serial_no
+  order by count(p.serial_no) desc;
 
-(SELECT @maxca3=p.category
-FROM CustomerAddstoCartProduct cap INNER JOIN Product p ON cap.serial_no=p.serial_number
-WHERE cap.customer_name=@customername
-GROUP BY p.category
-HAVING COUNT(*)=(
-SELECT MAX(count3)
-FROM(SELECT DISTINCT COUNT(*) AS 'count3'
-FROM CustomerAddstoCartProduct cap INNER JOIN Product p ON cap.serial_no=p.serial_number
-WHERE cap.customer_name=@customername AND p.category<>@maxca1 AND p.category <>@maxca2
-GROUP BY p.category)AS Temp3))
-
-DECLARE @pro1 INT
-DECLARE @pro2 INT 
-DECLARE @pro3 INT
-
-SELECT @pro1=w.serial_no
-FROM Wishlist_Product w INNER JOIN Product p ON w.serial_no=p.serial_number
-WHERE p.category=@maxca1 AND ROWNUM <=1
-
-IF @pro1<>NULL
-(SELECT @pro2=w.serial_no
-FROM Wishlist_Product w INNER JOIN Product p ON w.serial_no=p.serial_number
-WHERE p.category=@maxca2 AND ROWNUM <=1)
-
-ELSE
-BEGIN
-(SELECT @pro1=w.serial_no
-FROM Wishlist_Product w INNER JOIN Product p ON w.serial_no=p.serial_number
-WHERE p.category=@maxca2 AND ROWNUM <=1)
-(SELECT @pro2=w.serial_no
-FROM Wishlist_Product w INNER JOIN Product p ON w.serial_no=p.serial_number
-WHERE p.category=@maxca2 AND ROWNUM <=1 AND w.serial_no<>@pro1)
-END
-IF @pro2<>NULL
-(SELECT @pro3=w.serial_no
-FROM Wishlist_Product w INNER JOIN Product p ON w.serial_no=p.serial_number
-WHERE p.category=@maxca3 AND ROWNUM <=1)
-
-ELSE
-BEGIN
-IF @pro1<>NULL
-BEGIN
-(SELECT @pro2=w.serial_no
-FROM Wishlist_Product w INNER JOIN Product p ON w.serial_no=p.serial_number
-WHERE p.category=@maxca3 AND ROWNUM <=1 AND w.serial_no<>@pro1)
-(SELECT @pro3=w.serial_no
-FROM Wishlist_Product w INNER JOIN Product p ON w.serial_no=p.serial_number
-WHERE p.category=@maxca3 AND ROWNUM <=1 AND w.serial_no<>@pro1 AND w.serial_no<>@pro2)
-END
-ELSE
-BEGIN
-(SELECT @pro1=w.serial_no
-FROM Wishlist_Product w INNER JOIN Product p ON w.serial_no=p.serial_number
-WHERE p.category=@maxca3 AND ROWNUM <=1)
-(SELECT @pro2=w.serial_no
-FROM Wishlist_Product w INNER JOIN Product p ON w.serial_no=p.serial_number
-WHERE p.category=@maxca3 AND ROWNUM <=1 AND w.serial_no<>@pro1)
-(SELECT @pro3=w.serial_no
-FROM Wishlist_Product w INNER JOIN Product p ON w.serial_no=p.serial_number
-WHERE p.category=@maxca3 AND ROWNUM <=1 AND w.serial_no<>@pro1 AND w.serial_no<>@pro2)
-
-END
-END
-
-DECLARE @pro4 INT  --(2) ma3rafsh hatet3mel ezay
-DECLARE @pro5 INT   --output nothing leh
-DECLARE @pro6 INT   --6 products
-
-DECLARE @name1 VARCHAR(20)
-DECLARE @name2 VARCHAR(20)
-DECLARE @name3 VARCHAR(20)
-
-SELECT @name1=c1.customer_name --most similar ezay bardo
-FROM CustomerAddstoCartProduct c ,CustomerAddstoCartProduct c1 
-WHERE c.customer_name=@customername
+  select p.serial_no,p.product_name,p.category,p.product_description,p.price,p.final_price,p.color
+  from Product p inner join @Product2serials ps on p.serial_no=ps.serial
+ 
 END
